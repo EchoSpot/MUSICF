@@ -30,7 +30,9 @@
 						<span class="dot"></span>
 						<span class="dot"></span>
 					</div> -->
-					<!-- <div class="progress-wrapper"></div> -->
+					<div class="progress-wrapper">
+						<progress-bar></progress-bar>					
+					</div>
 					<div class="operators">
 						<div class="icon i-left">
 							<i class="icon-sequence"></i>
@@ -69,18 +71,18 @@
 					
 			</div>
 		</transition>
-		<audio src="currentSong.url" ref='audio'></audio>
 	</div>
 </template>
 <script>
 import { mapGetters,mapMutations } from 'vuex'
 import animations  from 'create-keyframe-animation'
 import {prefixStyle} from 'common/js/dom'
+import progressBar from 'base/progress-bar/progress-bar'
 const  transform=prefixStyle('transform');
 	export default{
 		mounted(){
+			this.player=new  QMplayer();
 			console.log(this.currentSong);
-
 		},
 		computed:{
 			...mapGetters([
@@ -215,24 +217,27 @@ const  transform=prefixStyle('transform');
 				}
 			},
 
-
-
 		},
 		watch:{
 			currentSong(newSong,oldSong){
+				let mid=this.currentSong.mid;
+
 				this.$nextTick(() =>{
-					this.$refs.audio.play();
+					this.player.play();
 
 				});
 			},
-			playing(newVal,oldVal){
-				const audio=this.$refs.audio;
+			playing(newVal,oldVal){	
+				let mid=this.currentSong.id;			
 				this.$nextTick(()=>{
-					newVal ? audio.play() : audio.pause();
+					newVal ? this.player.play(mid) : this.player.pause();
 				})
 			},
 
-		}
+		},
+		components:{
+			progressBar
+		},
 
 	}
 </script>
