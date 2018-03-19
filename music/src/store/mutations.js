@@ -6,7 +6,7 @@ const matutaions={
     
     //播放
 	[types.SET_PLAYING_STATE](state,flag){
-		state.flag=flag;
+		state.playing=flag;
 	},
 	[types.SET_FULL_SCREEN](state,flag){
 		state.fullScreen=flag;

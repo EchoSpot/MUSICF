@@ -19,7 +19,7 @@
 				<div class="middle">
 					<div class="middle-l">
 						<div class="cd-wrapper" ref="cdWrapper">
-							<div class="cd">
+							<div class="cd" ref='cd' :class='isRotate()'>
 								<img :src="currentSong.image" alt="tupain">
 							</div>
 						</div>
@@ -35,13 +35,13 @@
 						<div class="icon i-left">
 							<i class="icon-sequence"></i>
 						</div>
-						<div class="icon i-left">
+						<div class="icon i-left" @click='prev'>
 							<i class="icon-prev"></i>
 						</div>	
 						<div class="icon i-center">
-							<i class="icon-play"></i>
+							<i  @click="togglePlaying" :class='playIcon()'></i>
 						</div>
-						<div class="icon  i-right">
+						<div class="icon  i-right" @click='next'>
 							<i class="icon-next"></i>
 						</div>
 						<div class="icon i-right">
@@ -53,7 +53,7 @@
 		</transition>
 		<transition name="mini">
 			<div class="mini-player" v-show='!fullScreen' @click="open">		
-				<div class="icon">
+				<div class="icon" :class='isRotate()'>
 					<img :src="currentSong.image" width="40" height="40">
 				</div>
 				<div class="text">
@@ -87,13 +87,17 @@ const  transform=prefixStyle('transform');
 				'fullScreen',
 				'playList',
 				'currentSong',
+				'playing',
+				'currentIndex',
 
 			]),
 			
 		},
 		methods:{
 			...mapMutations({
-				setFullScreen:'SET_FULL_SCREEN'
+				setFullScreen:'SET_FULL_SCREEN',
+				setPlayingState:'SET_PLAYING_STATE',
+				setCurrentIndex:'SET_CURRENT_INDEX',
 			}),
 			back(){
 				this.setFullScreen(false);
@@ -160,6 +164,34 @@ const  transform=prefixStyle('transform');
 				cdWrapper.style[transform]='';
 
 			},
+			//切换播放
+			togglePlaying(){
+				this.setPlayingState(!this.playing);
+			},
+			//切换图标
+			playIcon(){
+				return this.playing?'icon-pause':'icon-play'
+
+			},
+			isRotate(){
+				return this.playing?'rotate':'rotate rotateStop'
+			},
+			prev(){
+				let index=this.currentIndex +1;
+				if(index===this.playList.length){
+					index=0;
+				}
+				this.setCurrentIndex(index);
+
+			},
+			next(){
+				let index=this.currentIndex-1;
+				if(index===0){
+					index=this.playList.length-1;
+				}
+				this.setCurrentIndex(index);
+
+			},
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
 				//小cd
@@ -184,6 +216,7 @@ const  transform=prefixStyle('transform');
 			},
 
 
+
 		},
 		watch:{
 			currentSong(newSong,oldSong){
@@ -191,7 +224,14 @@ const  transform=prefixStyle('transform');
 					this.$refs.audio.play();
 
 				});
-			}
+			},
+			playing(newVal,oldVal){
+				const audio=this.$refs.audio;
+				this.$nextTick(()=>{
+					newVal ? audio.play() : audio.pause();
+				})
+			},
+
 		}
 
 	}
@@ -255,7 +295,7 @@ const  transform=prefixStyle('transform');
 					width:100%;
 					.cd-wrapper{
 						width:80%;
-						margin:0 auto;
+						margin:0 auto;						
 					}
 					.cd{
 						width:100%;
@@ -267,6 +307,13 @@ const  transform=prefixStyle('transform');
 							width:100%;
 							height:100%;
 							border-radius:50%;
+						}
+						&.rotate{
+							animation: rotate 18s linear infinite;
+
+						}
+						&.rotateStop{
+							animation-play-state:paused;
 						}
 
 					}
@@ -292,9 +339,7 @@ const  transform=prefixStyle('transform');
 						}
 						&.i-center{
 							padding:0 20px;
-							.icon-play{
-								font-size:40px;
-							}
+							font-size:40px;
 						}
 					}
 				}
@@ -317,6 +362,12 @@ const  transform=prefixStyle('transform');
 					width:40px;
 					height:40px;
 					border-radius: 50%;
+				}
+				&.rotate{
+					animation: rotate 10s linear infinite;
+				}
+				&.rotateStop{
+					animation-play-state:paused;
 				}
 			}
 			.text{
@@ -347,6 +398,8 @@ const  transform=prefixStyle('transform');
 
 
 	}
+
+
 	.normal-enter-active,
 	.normal-leave-active
 	{
@@ -367,10 +420,20 @@ const  transform=prefixStyle('transform');
 	.mini-enter-active,
 	.mini-leave-active{
 		transition: opacity .5s;
-
 	}
 	.mini-enter,.mini-leave-to{
 		opacity:0;
+
+	}
+	@keyframes rotate{
+		0%{
+			transform:rotate(0deg);
+		}
+		100%{
+			transform:rotate(360deg);
+
+		}
+
 
 	}
 </style>
