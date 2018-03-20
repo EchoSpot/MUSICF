@@ -19,7 +19,7 @@
 				<div class="middle">
 					<div class="middle-l">
 						<div class="cd-wrapper" ref="cdWrapper">
-							<div class="cd" ref='cd' :class='isRotate()'>
+							<div class="cd" ref='cd' :class='isRotate'>
 								<img :src="currentSong.image" alt="tupain">
 							</div>
 						</div>
@@ -33,11 +33,11 @@
 
 					<!-- 进度条 -->
 					<div class="progress-wrapper">
-						<span class="time time-l">{{currentTime}}</span>
+						<span class="time time-l">{{format(currentTime)}}</span>
 						<div class="progress-bar-wrapper">
-							<progress-bar ></progress-bar>
+							<progress-bar :percent='percent'></progress-bar>
 						</div>						
-						<span class="time time-r">{{duration}}</span>					
+						<span class="time time-r">{{format(currentSong.duration)}}</span>					
 					</div>
 					<!-- 播放、暂停、前进、后退、收藏 -->
 					<div class="operators">
@@ -48,7 +48,7 @@
 							<i class="icon-prev"></i>
 						</div>	
 						<div class="icon i-center">
-							<i  @click="togglePlaying" :class='playIcon()'></i>
+							<i  @click="togglePlaying" :class='playIcon'></i>
 						</div>
 						<div class="icon  i-right" @click='next'>
 							<i class="icon-next"></i>
@@ -62,7 +62,7 @@
 		</transition>
 		<transition name="mini">
 			<div class="mini-player" v-show='!fullScreen' @click="open">		
-				<div class="icon" :class='isRotate()'>
+				<div class="icon" :class='isRotate'>
 					<img :src="currentSong.image" width="40" height="40">
 				</div>
 				<div class="text">
@@ -77,7 +77,7 @@
 				</div>					
 			</div>
 		</transition>
-		<audio :src='currentSong.url' ref='audio'></audio>
+		<audio :src='currentSong.url' ref='audio' @timeupdate='timeUpdate'></audio>
 	</div>
 </template>
 <script>
@@ -87,14 +87,14 @@ import { prefixStyle } from 'common/js/dom'
 import progressBar from 'base/progress-bar/progress-bar'
 const  transform=prefixStyle('transform');
 	export default{
-		mounted(){
-			this.init();
+		created(){
 
+		},
+		mounted(){
 		},
 		data(){
 			return {
-				duration:'',
-				currentTime:'',
+				currentTime:0,
 			}
 		},
 		computed:{
@@ -105,6 +105,17 @@ const  transform=prefixStyle('transform');
 				'playing',
 				'currentIndex',
 			]),
+			//进度百分比
+			percent(){
+				return this.currentTime/this.currentSong.duration;
+			},
+			playIcon(){
+				return this.playing?'icon-pause':'icon-play'
+
+			},
+			isRotate(){
+				return this.playing?'rotate':'rotate rotateStop'
+			},
 			
 		},
 		methods:{
@@ -113,10 +124,6 @@ const  transform=prefixStyle('transform');
 				setPlayingState:'SET_PLAYING_STATE',
 				setCurrentIndex:'SET_CURRENT_INDEX',
 			}),
-			init(){
-
-
-			},
 			back(){
 				this.setFullScreen(false);
 
@@ -187,13 +194,7 @@ const  transform=prefixStyle('transform');
 				this.setPlayingState(!this.playing);
 			},
 			//切换图标
-			playIcon(){
-				return this.playing?'icon-pause':'icon-play'
-
-			},
-			isRotate(){
-				return this.playing?'rotate':'rotate rotateStop'
-			},
+			
 			prev(){
 				let index=this.currentIndex +1;
 				if(index===this.playList.length){
@@ -209,6 +210,17 @@ const  transform=prefixStyle('transform');
 				}
 				this.setCurrentIndex(index);
 
+			},
+			format(time){
+				time= time | 0;
+				let min=time/60 | 0;
+				let sec=time%60 | 0;
+				return `${this._pad(min)}:${this._pad(sec)}`
+			},
+			//设置时间更改
+			timeUpdate(e){
+				this.currentTime=e.target.currentTime;
+				
 			},
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
@@ -232,10 +244,24 @@ const  transform=prefixStyle('transform');
 					scale
 				}
 			},
+			_pad(num,n=2){
+				let len=num.toString().length;
+				while(len<n){
+					num='0'+num;
+					len++;
+				}
+				return num;
+			}
 
 		},
 		watch:{
 			currentSong(newSong,oldSong){
+				if(!newSong.id){
+					return
+				}
+				if(newSong.id === oldSong.id){
+					return
+				}
 				const audio=this.$refs.audio;	
 				this.$nextTick(() =>{
 					if(this.playing){

@@ -16,11 +16,16 @@
 <script>
 
 	export default{
+		props:{
+			percent:{
+				type:Number,
+				default:0
+			}
+		},
 		data(){
 			return {
 				touches:{},
 				precent:0,
-
 			}
 		},
 		methods:{
@@ -44,6 +49,12 @@
 				this.$emit('touchend',this.precent);
 
 			},
+		},
+		watch:{
+			percent(newVal){
+				// console.log(newVal);
+			},
+			
 		}
 
 	}
