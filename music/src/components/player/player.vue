@@ -35,7 +35,7 @@
 					<div class="progress-wrapper">
 						<span class="time time-l">{{format(currentTime)}}</span>
 						<div class="progress-bar-wrapper">
-							<progress-bar :percent='percent'></progress-bar>
+							<progress-bar :percent='percent' @percentChange='percentChange'></progress-bar>
 						</div>						
 						<span class="time time-r">{{format(currentSong.duration)}}</span>					
 					</div>
@@ -219,8 +219,12 @@ const  transform=prefixStyle('transform');
 			},
 			//设置时间更改
 			timeUpdate(e){
-				this.currentTime=e.target.currentTime;
-				
+				this.currentTime=e.target.currentTime;			
+			},
+			percentChange(percent){
+				let currentTime=percent*this.currentSong.duration;
+				this.currentTime=currentTime;
+				this.$refs.audio.currentTime=currentTime;
 			},
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
@@ -262,6 +266,7 @@ const  transform=prefixStyle('transform');
 				if(newSong.id === oldSong.id){
 					return
 				}
+				this.currentTime=0;
 				const audio=this.$refs.audio;	
 				this.$nextTick(() =>{
 					if(this.playing){
@@ -375,15 +380,15 @@ const  transform=prefixStyle('transform');
 				.progress-wrapper{
 					display:flex;
 					align-items:center;
-					width:98%;
+					width:96%;
 					margin:0 auto;
 					padding:10px 0;
 					.time{
 						display:block;
-						width:30px;
-						flex:0 0 30px;
+						width:40px;
+						flex:0 0 40px;
 						text-align:center;
-						padding:0 10px;
+						padding:0 15px;
 						color: $color-text;
 						font-size: $font-size-small;
 					}
@@ -459,7 +464,12 @@ const  transform=prefixStyle('transform');
 				flex:0 0 30px;
 				width:30px;
 				padding:0 10px;
+				.icon-playlist{
+					font-size: 30px;
+					color: $color-theme-d;
+				}
 			}
+
 
 		}
 
