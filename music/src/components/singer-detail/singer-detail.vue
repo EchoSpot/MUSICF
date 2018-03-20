@@ -45,8 +45,9 @@ export default{
 			}
 			getSingerDetail(this.singer.mid).then((res)=>{
 				if(res.code === ERR_OK){
+					// console.log(res.data);
 					this.songs=this._normalizeSongs(res.data.list);
-					console.log(this.songs);
+					// console.log(this.songs);
 				}
 			});
 		},

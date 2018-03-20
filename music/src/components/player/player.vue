@@ -30,9 +30,16 @@
 						<span class="dot"></span>
 						<span class="dot"></span>
 					</div> -->
+
+					<!-- 进度条 -->
 					<div class="progress-wrapper">
-						<progress-bar></progress-bar>					
+						<span class="time time-l">{{currentTime}}</span>
+						<div class="progress-bar-wrapper">
+							<progress-bar ></progress-bar>
+						</div>						
+						<span class="time time-r">{{duration}}</span>					
 					</div>
+					<!-- 播放、暂停、前进、后退、收藏 -->
 					<div class="operators">
 						<div class="icon i-left">
 							<i class="icon-sequence"></i>
@@ -67,22 +74,28 @@
 				</div>
 				<div class="control">
 					<i class="icon-playlist"></i>
-				</div>
-					
+				</div>					
 			</div>
 		</transition>
+		<audio :src='currentSong.url' ref='audio'></audio>
 	</div>
 </template>
 <script>
 import { mapGetters,mapMutations } from 'vuex'
 import animations  from 'create-keyframe-animation'
-import {prefixStyle} from 'common/js/dom'
+import { prefixStyle } from 'common/js/dom'
 import progressBar from 'base/progress-bar/progress-bar'
 const  transform=prefixStyle('transform');
 	export default{
 		mounted(){
-			this.player=new  QMplayer();
-			console.log(this.currentSong);
+			this.init();
+
+		},
+		data(){
+			return {
+				duration:'',
+				currentTime:'',
+			}
 		},
 		computed:{
 			...mapGetters([
@@ -91,7 +104,6 @@ const  transform=prefixStyle('transform');
 				'currentSong',
 				'playing',
 				'currentIndex',
-
 			]),
 			
 		},
@@ -101,6 +113,10 @@ const  transform=prefixStyle('transform');
 				setPlayingState:'SET_PLAYING_STATE',
 				setCurrentIndex:'SET_CURRENT_INDEX',
 			}),
+			init(){
+
+
+			},
 			back(){
 				this.setFullScreen(false);
 
@@ -220,17 +236,18 @@ const  transform=prefixStyle('transform');
 		},
 		watch:{
 			currentSong(newSong,oldSong){
-				let mid=this.currentSong.mid;
-
+				const audio=this.$refs.audio;	
 				this.$nextTick(() =>{
-					this.player.play();
+					if(this.playing){
+						audio.play();
 
+					}
 				});
 			},
-			playing(newVal,oldVal){	
-				let mid=this.currentSong.id;			
+			playing(newVal,oldVal){		
+			    const audio=this.$refs.audio;	
 				this.$nextTick(()=>{
-					newVal ? this.player.play(mid) : this.player.pause();
+					newVal ? audio.play() : audio.pause();
 				})
 			},
 
@@ -329,6 +346,25 @@ const  transform=prefixStyle('transform');
 				position: absolute;
 				width:100%;
 				bottom:50px;
+				.progress-wrapper{
+					display:flex;
+					align-items:center;
+					width:98%;
+					margin:0 auto;
+					padding:10px 0;
+					.time{
+						display:block;
+						width:30px;
+						flex:0 0 30px;
+						text-align:center;
+						padding:0 10px;
+						color: $color-text;
+						font-size: $font-size-small;
+					}
+					.progress-bar-wrapper{
+						flex:1;
+					}
+				}
 				.operators{
 					display:flex;
 					align-items:center;
