@@ -1,12 +1,12 @@
 <template>
-	<div class="progress-bar" ref='progressBar'>
-		<div class="bar-inner">
+	<div class="progress-bar" ref='progressBar' >
+		<div class="bar-inner" @click='progressClick'>
 			<div class="progress" ref='progress'></div>
 			<div class="progress-btn-wrapper" ref='progressBtn'>
 				<div class="progress-btn" 
-					@touchstart='touchstart'
-					@touchmove='touchmove'
-					@touchend='touchend'
+					@touchstart.stop='touchstart'
+					@touchmove.stop='touchmove'
+					@touchend.stop='touchend'
 					>						
 				</div>
 			</div>
@@ -26,7 +26,7 @@
 		},
 		methods:{
 			touchstart(e){
-				this.touch.initiated=true; //标志位是否触碰
+				this.touch.initiated=true; //标志位是否触碰并且设置优先级
 				this.touch.startX=e.touches[0].pageX;	
 				this.touch.left=this.$refs.progress.clientWidth;			
 			},
@@ -38,13 +38,20 @@
 				let w=Math.min(this.$refs.progressBar.clientWidth,
 								Math.max(deltaX+this.touch.left,0));
                 this._offset(w);
-
 			},
 			touchend(){
 				this.modifyPercent();
 				this.touch.initiated=false;
 				
 			},
+			progressClick(e){
+				const progressBar=this.$refs.progressBar;
+				const left=e.pageX-progressBar.getBoundingClientRect().left;				
+				let percent=left/progressBar.clientWidth;
+				this.$emit('progressClick',percent);
+
+			},
+			//拖动结束的时候，将拖到的百分比派发出去
 			modifyPercent(){
 				let width=this.$refs.progress.clientWidth;
 				let percent=width/this.$refs.progressBar.clientWidth;
@@ -55,13 +62,13 @@
 				this.$refs.progress.style.width=`${offsetWidth}px`;
 				this.$refs.progressBtn.style.left=`${offsetWidth}px`;
 			},
+
 		},
 		watch:{
 			//改变进度条 ，传递进来百分比。
 			percent(newPercent){
 				if(newPercent>0 && !this.touch.initiated){
 					let progressBar=this.$refs.progressBar;
-
 					let wPercent=progressBar.clientWidth*newPercent;
 					this.$refs.progress.style.width=wPercent+'px';
 					this.$refs.progressBtn.style.left=newPercent*100+'%';
@@ -112,6 +119,7 @@
 					height:16px;
 					border-radius:50%;
 					background-color:$color-theme;
+					transform:translateX(-6px);
 				}
 
 			}

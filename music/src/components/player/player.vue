@@ -35,7 +35,11 @@
 					<div class="progress-wrapper">
 						<span class="time time-l">{{format(currentTime)}}</span>
 						<div class="progress-bar-wrapper">
-							<progress-bar :percent='percent' @percentChange='percentChange'></progress-bar>
+							<progress-bar 
+								:percent='percent'
+								@percentChange='percentChange'
+								@progressClick='progressClick'
+							></progress-bar>
 						</div>						
 						<span class="time time-r">{{format(currentSong.duration)}}</span>					
 					</div>
@@ -77,7 +81,10 @@
 				</div>					
 			</div>
 		</transition>
-		<audio :src='currentSong.url' ref='audio' @timeupdate='timeUpdate'></audio>
+		<audio :src='currentSong.url' ref='audio' 
+				@timeupdate='timeUpdate'
+				@ended='aduioEnd'
+				@canplay='canplay'></audio>
 	</div>
 </template>
 <script>
@@ -95,6 +102,7 @@ const  transform=prefixStyle('transform');
 		data(){
 			return {
 				currentTime:0,
+				songReady:false,
 			}
 		},
 		computed:{
@@ -195,21 +203,38 @@ const  transform=prefixStyle('transform');
 			},
 			//切换图标
 			
-			prev(){
+			next(){
+				console.log('------'+this.songReady);
+				if(!this.songReady){
+					return 
+				}
+				this.currentTime=0;
 				let index=this.currentIndex +1;
 				if(index===this.playList.length){
 					index=0;
 				}
 				this.setCurrentIndex(index);
+				this.songReady=false;
 
 			},
-			next(){
+			prev(){
+				if(!this.songReady){
+					return 
+				}
+				this.currentTime=0;
 				let index=this.currentIndex-1;
 				if(index===0){
 					index=this.playList.length-1;
 				}
 				this.setCurrentIndex(index);
+				this.songReady=false;
 
+			},
+			aduioEnd(){
+				this.next();
+			},
+			canplay(){
+				this.songReady=true;
 			},
 			format(time){
 				time= time | 0;
@@ -221,11 +246,19 @@ const  transform=prefixStyle('transform');
 			timeUpdate(e){
 				this.currentTime=e.target.currentTime;			
 			},
+			//进度条
 			percentChange(percent){
 				let currentTime=percent*this.currentSong.duration;
 				this.currentTime=currentTime;
 				this.$refs.audio.currentTime=currentTime;
 			},
+			//进度条
+			progressClick(percent){
+				let currentTime=percent*this.currentSong.duration;
+				this.currentTime=currentTime;
+				this.$refs.audio.currentTime=currentTime;
+			},
+
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
 				//小cd
