@@ -45,8 +45,8 @@
 					</div>
 					<!-- 播放、暂停、前进、后退、收藏 -->
 					<div class="operators">
-						<div class="icon i-left">
-							<i class="icon-sequence"></i>
+						<div class="icon i-left" @click='changeMode'>
+							<i :class="modeIcon"></i>
 						</div>
 						<div class="icon i-left" @click='prev'>
 							<i class="icon-prev"></i>
@@ -71,10 +71,15 @@
 				</div>
 				<div class="text">
 					<h2 class="name" v-html='currentSong.name'></h2>
-					<p class="desc" v-html='currentSong.singer'></p>
+					<p class="desc"  v-html='currentSong.singer'></p>
 				</div>
-				<div class="control">
-					<i class="icon-mini"></i>
+				<div class="control" @click.stop='togglePlaying'>					
+					<progress-circle 
+						:width='progressCircleWidth' 
+						:percent='percent'
+					>
+						<i class="icon-mini" :class='playIconMini'></i>
+					</progress-circle>
 				</div>
 				<div class="control">
 					<i class="icon-playlist"></i>
@@ -92,6 +97,8 @@ import { mapGetters,mapMutations } from 'vuex'
 import animations  from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import progressBar from 'base/progress-bar/progress-bar'
+import progressCircle from 'base/progress-circle/progress-circle'
+import {playMode} from 'common/js/config'
 const  transform=prefixStyle('transform');
 	export default{
 		created(){
@@ -103,6 +110,7 @@ const  transform=prefixStyle('transform');
 			return {
 				currentTime:0,
 				songReady:false,
+				progressCircleWidth:32,
 			}
 		},
 		computed:{
@@ -112,6 +120,7 @@ const  transform=prefixStyle('transform');
 				'currentSong',
 				'playing',
 				'currentIndex',
+				'mode',
 			]),
 			//进度百分比
 			percent(){
@@ -121,8 +130,22 @@ const  transform=prefixStyle('transform');
 				return this.playing?'icon-pause':'icon-play'
 
 			},
+			playIconMini(){
+				return this.playing?'icon-pause-mini':'icon-play-mini'
+			},
 			isRotate(){
 				return this.playing?'rotate':'rotate rotateStop'
+			},
+			modeIcon(){
+				const mode=this.mode;
+				switch(mode){
+					case playMode.sequence:
+						return 'icon-sequence';
+					case playMode.loop:
+						return 'icon-loop'
+					case playMode.random:
+					    return 'icon-random'
+				}
 			},
 			
 		},
@@ -131,6 +154,7 @@ const  transform=prefixStyle('transform');
 				setFullScreen:'SET_FULL_SCREEN',
 				setPlayingState:'SET_PLAYING_STATE',
 				setCurrentIndex:'SET_CURRENT_INDEX',
+				setPlayMode:'SET_PLAY_MODE',
 			}),
 			back(){
 				this.setFullScreen(false);
@@ -201,8 +225,11 @@ const  transform=prefixStyle('transform');
 			togglePlaying(){
 				this.setPlayingState(!this.playing);
 			},
-			//切换图标
-			
+			//切换播放模式图标
+			changeMode(){
+				let modeType=(this.mode+1)%3;
+				this.setPlayMode(modeType);
+			},			
 			next(){
 				console.log('------'+this.songReady);
 				if(!this.songReady){
@@ -231,6 +258,9 @@ const  transform=prefixStyle('transform');
 
 			},
 			aduioEnd(){
+				if(this.mode == playMode.loop){
+					this.$refs.audio.currentTime=0;
+				}
 				this.next();
 			},
 			canplay(){
@@ -317,7 +347,8 @@ const  transform=prefixStyle('transform');
 
 		},
 		components:{
-			progressBar
+			progressBar,
+			progressCircle,
 		},
 
 	}
@@ -360,8 +391,6 @@ const  transform=prefixStyle('transform');
 					@include no-wrap;
 					font-size:$font-size-large-x;
 					color:$color-theme;
-					
-
 				}
 				.subtitle{
 					width:100%;
@@ -494,12 +523,23 @@ const  transform=prefixStyle('transform');
 
 			}
 			.control{
+				position: relative;
 				flex:0 0 30px;
 				width:30px;
 				padding:0 10px;
 				.icon-playlist{
 					font-size: 30px;
 					color: $color-theme-d;
+				}
+				.icon-play-mini,.icon-pause-mini{
+					font-size:30px;
+					color:$color-theme-d;
+				}
+				.icon-mini{
+					position: absolute;
+					left:0;
+					top:0;
+
 				}
 			}
 

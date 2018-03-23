@@ -1,4 +1,5 @@
 import {playMode} from 'common/js/config.js'
+
 const state={
 	singer:{},
 	playing:false,
@@ -9,7 +10,7 @@ const state={
 	currentIndex: -1,
 	
 	disc:{},
-	topList:{}
+	topList:{},
 
 
 }
