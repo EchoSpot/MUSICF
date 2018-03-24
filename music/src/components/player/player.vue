@@ -48,13 +48,13 @@
 						<div class="icon i-left" @click='changeMode'>
 							<i :class="modeIcon"></i>
 						</div>
-						<div class="icon i-left" @click='prev'>
+						<div class="icon i-left" @click='prev' :class='disableCls'>
 							<i class="icon-prev"></i>
 						</div>	
-						<div class="icon i-center">
+						<div class="icon i-center"  :class='disableCls'>
 							<i  @click="togglePlaying" :class='playIcon'></i>
 						</div>
-						<div class="icon  i-right" @click='next'>
+						<div class="icon  i-right" @click='next' :class='disableCls'>
 							<i class="icon-next"></i>
 						</div>
 						<div class="icon i-right">
@@ -89,7 +89,8 @@
 		<audio :src='currentSong.url' ref='audio' 
 				@timeupdate='timeUpdate'
 				@ended='aduioEnd'
-				@canplay='canplay'></audio>
+				@canplay='canplay'
+				@error='error'></audio>
 	</div>
 </template>
 <script>
@@ -99,24 +100,22 @@ import { prefixStyle } from 'common/js/dom'
 import progressBar from 'base/progress-bar/progress-bar'
 import progressCircle from 'base/progress-circle/progress-circle'
 import {playMode} from 'common/js/config'
+import {getRandomInt}  from 'common/js/util'
 const  transform=prefixStyle('transform');
 	export default{
-		created(){
-
-		},
-		mounted(){
-		},
 		data(){
 			return {
 				currentTime:0,
 				songReady:false,
 				progressCircleWidth:32,
+				randomModeTime:0,
 			}
 		},
 		computed:{
 			...mapGetters([
 				'fullScreen',
 				'playList',
+				'sequenceList',
 				'currentSong',
 				'playing',
 				'currentIndex',
@@ -135,6 +134,9 @@ const  transform=prefixStyle('transform');
 			},
 			isRotate(){
 				return this.playing?'rotate':'rotate rotateStop'
+			},
+			disableCls(){
+				return this.songReady?'':'disable'
 			},
 			modeIcon(){
 				const mode=this.mode;
@@ -155,6 +157,7 @@ const  transform=prefixStyle('transform');
 				setPlayingState:'SET_PLAYING_STATE',
 				setCurrentIndex:'SET_CURRENT_INDEX',
 				setPlayMode:'SET_PLAY_MODE',
+				setPlayList:'SET_PLAYLIST',
 			}),
 			back(){
 				this.setFullScreen(false);
@@ -228,19 +231,34 @@ const  transform=prefixStyle('transform');
 			//切换播放模式图标
 			changeMode(){
 				let modeType=(this.mode+1)%3;
-				this.setPlayMode(modeType);
+				this.setPlayMode(modeType);		
 			},			
 			next(){
-				console.log('------'+this.songReady);
 				if(!this.songReady){
 					return 
 				}
 				this.currentTime=0;
-				let index=this.currentIndex +1;
-				if(index===this.playList.length){
-					index=0;
+
+				let index=-1;
+				if(this.mode === playMode.sequence){
+					index=this.currentIndex +1;
+					if(index===this.playList.length){
+						index=0;
+					}
+
+				}else if(this.mode === playMode.random){
+					index=getRandomInt(0,this.playList.length-1);
+					while(index === this.currentIndex){
+						index=getRandomInt(0,this.playList.length-1);
+					}
+
 				}
+								
 				this.setCurrentIndex(index);
+                //如果暂停的时候，切换下一首可以播放
+				if(!this.playing){
+					this.togglePlaying();
+				}
 				this.songReady=false;
 
 			},
@@ -249,21 +267,42 @@ const  transform=prefixStyle('transform');
 					return 
 				}
 				this.currentTime=0;
-				let index=this.currentIndex-1;
-				if(index===0){
-					index=this.playList.length-1;
+				let index=-1;	
+				if(this.mode === playMode.sequence){
+					index=this.currentIndex-1;
+					if(index===0){
+						index=this.playList.length-1;
+					}
+					
+				}else if(this.mode === playMode.random){
+					index=getRandomInt(0,this.playList.length-1);
+					while(index === this.currentIndex){
+						index=getRandomInt(0,this.playList.length-1);
+					}
 				}
 				this.setCurrentIndex(index);
+				if(!this.playing){
+					this.togglePlaying();
+				}
+
 				this.songReady=false;
 
 			},
+			loop(){
+				this.$refs.audio.currentTime=0;
+				this.$refs.audio.play();
+			},
 			aduioEnd(){
 				if(this.mode == playMode.loop){
-					this.$refs.audio.currentTime=0;
-				}
-				this.next();
+					this.loop();
+				}else{
+					this.next();
+				}				
 			},
 			canplay(){
+				this.songReady=true;
+			},
+			error(){
 				this.songReady=true;
 			},
 			format(time){
@@ -288,7 +327,6 @@ const  transform=prefixStyle('transform');
 				this.currentTime=currentTime;
 				this.$refs.audio.currentTime=currentTime;
 			},
-
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
 				//小cd
@@ -323,19 +361,20 @@ const  transform=prefixStyle('transform');
 		},
 		watch:{
 			currentSong(newSong,oldSong){
+				console.log(`this is currentSong${newSong}`);
+				// console.log(newSong.getLyric(newSong.id));
+				
 				if(!newSong.id){
 					return
 				}
 				if(newSong.id === oldSong.id){
 					return
-				}
-				this.currentTime=0;
+				}							
 				const audio=this.$refs.audio;	
 				this.$nextTick(() =>{
 					if(this.playing){
 						audio.play();
-
-					}
+					}					
 				});
 			},
 			playing(newVal,oldVal){		
@@ -502,6 +541,10 @@ const  transform=prefixStyle('transform');
 				}
 				&.rotateStop{
 					animation-play-state:paused;
+				}
+				&disable{
+					color: $color-theme-d;
+
 				}
 			}
 			.text{

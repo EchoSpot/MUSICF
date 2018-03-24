@@ -67,7 +67,7 @@
 		watch:{
 			//改变进度条 ，传递进来百分比。
 			percent(newPercent){
-				if(newPercent>0 && !this.touch.initiated){
+				if(newPercent>=0 && !this.touch.initiated){
 					let progressBar=this.$refs.progressBar;
 					let wPercent=progressBar.clientWidth*newPercent;
 					this.$refs.progress.style.width=wPercent+'px';

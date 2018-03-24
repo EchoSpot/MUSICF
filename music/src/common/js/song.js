@@ -1,3 +1,6 @@
+import { getLyric } from 'api/lyrics'
+import {ERR_OK} from 'api/config'
+import {Base64} from 'js-base64'
 export default class Song{
 	constructor({id,mid,singer,name,album,duration,image,url}){
 		this.id=id
@@ -8,6 +11,30 @@ export default class Song{
 		this.duration=duration
 		this.image=image
 		this.url=url
+	}
+	// getLyric(cid){
+	// 	return new Promise((resolve,reject)=>{
+	// 		getLyrics('1313993').then((res)=>{
+	// 			resolve(res.lyric);
+	// 		})
+	// 	});
+
+	// }
+	getLyric() {
+	  if (this.lyric) {
+	    return Promise.resolve(this.lyric)
+	  }
+
+	  return new Promise((resolve, reject) => {
+	    getLyric(this.mid).then((res) => {
+	      if (res.retcode === ERR_OK) {
+	        this.lyric = Base64.decode(res.lyric)
+	        resolve(this.lyric)
+	      } else {
+	        reject('no lyric')
+	      }
+	    })
+	  })
 	}
 }
 export function createSong(musicData){
@@ -23,6 +50,7 @@ export function createSong(musicData){
 	})
 
 }
+//过滤
 function filterSinger(singer){
    let ret=[];
    if(!singer.length){
