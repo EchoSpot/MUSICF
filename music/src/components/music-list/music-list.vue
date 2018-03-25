@@ -7,7 +7,7 @@
 		<div class="bg-image" :style='bgStyle' ref='image'>
 			<div class="filter"></div>
 			<div class="play-wrap" ref='playWrap'>
-				<div class="playBtn" v-show="data.length>0">
+				<div class="playBtn" v-show="data.length>0" @click='playRandom'>
 					<i class="icon-play"></i>	
 					<span class="text">随机播放全部</span>	
 				</div>
@@ -37,6 +37,7 @@ import Loading from '@/base/loading/loading'
 import SongList from '@/base/song-list/song-list'
 import {prefixStyle} from '@/common/js/dom'
 import {mapActions} from 'vuex'
+import {getRandomInt} from 'common/js/util'
 	const RESERVED_HEIGHT=40;
 
 	const transform =prefixStyle('transform')
@@ -87,10 +88,19 @@ import {mapActions} from 'vuex'
 			scroll(pos){
 				this.scrollY=pos.y;
 			},
+			playRandom(){
+				let index=getRandomInt(0,this.data.length);
+				this.selectPlay({
+					list:this.data,
+					index
+				})
+
+			},
 			...mapActions([
 				'selectPlay'
 
 			])
+
 		},
 		computed:{
 			//背景图片
