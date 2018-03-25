@@ -49,7 +49,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       app.get('/api/getSinger',function(req,res){
         let url='https://c.y.qq.com/v8/fcg-bin/v8.fcg';
         axios.get(url,{
-          header:{
+          headers:{
             referer:'https://y.qq.com',
             host:'c.y.qq.com'
           },
@@ -63,7 +63,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       app.get('/api/getSingerDetail',function(req,res){
         let url='https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg';
         axios.get(url,{
-          header:{
+         headers:{
             referer:'https://y.qq.com',
             host:'c.y.qq.com'
           },
@@ -74,10 +74,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           console.log(e);
         })
       }),
-      app.get('/api/getLyrics',function(req,res){
+      app.get('/api/getLyric',function(req,res){
         const url='https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg';
         axios.get(url,{
-          header:{
+          headers:{
             referer:'https://y.qq.com',
             host:'c.y.qq.com'
           },

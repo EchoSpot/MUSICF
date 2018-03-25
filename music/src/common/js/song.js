@@ -12,14 +12,7 @@ export default class Song{
 		this.image=image
 		this.url=url
 	}
-	// getLyric(cid){
-	// 	return new Promise((resolve,reject)=>{
-	// 		getLyrics('1313993').then((res)=>{
-	// 			resolve(res.lyric);
-	// 		})
-	// 	});
 
-	// }
 	getLyric() {
 	  if (this.lyric) {
 	    return Promise.resolve(this.lyric)
@@ -39,8 +32,8 @@ export default class Song{
 }
 export function createSong(musicData){
 	return new Song({
-		id:musicData.albumid,
-		mid:musicData.albummid,
+		id:musicData.songid,
+		mid:musicData.songmid,
 		singer:filterSinger(musicData.singer),
 		name:musicData.songname,
 		duration:musicData.interval,

@@ -361,9 +361,6 @@ const  transform=prefixStyle('transform');
 		},
 		watch:{
 			currentSong(newSong,oldSong){
-				console.log(`this is currentSong${newSong}`);
-				// console.log(newSong.getLyric(newSong.id));
-				
 				if(!newSong.id){
 					return
 				}
@@ -374,7 +371,8 @@ const  transform=prefixStyle('transform');
 				this.$nextTick(() =>{
 					if(this.playing){
 						audio.play();
-					}					
+					}
+					newSong.getLyric();					
 				});
 			},
 			playing(newVal,oldVal){		
