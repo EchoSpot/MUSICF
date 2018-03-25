@@ -16,6 +16,7 @@
 					<h1 class="title" v-html="currentSong.name"></h1>
 					<h2 class="subtitle" v-html='currentSong.singer'></h2>
 				</div>
+
 				<div class="middle">
 					<div class="middle-l">
 						<div class="cd-wrapper" ref="cdWrapper">
@@ -23,7 +24,22 @@
 								<img :src="currentSong.image" alt="tupain">
 							</div>
 						</div>
+						<!-- <div class="playing-lyric-wrapper">
+						  <div class="playing-lyric">{{playingLyric}}</div>
+						</div> -->
 					</div>
+					<scroll class="middle-r" 
+							ref='lyricList' 
+							:data='currentLyric && currentLyric.lines'>
+						<div class="lyric-wrapper">
+							<div v-if='currentLyric'>
+								<p ref='lyricLine' 
+								class="text"
+								:class="{'current':currentLineNum===index}"
+								v-for='(line,index) in currentLyric.lines'>{{line.txt}}</p>
+							</div>
+						</div>
+					</scroll>
 				</div>
 				<div class="bottom">
 					<!-- <div class="dot-wrapper">
@@ -102,6 +118,7 @@ import progressCircle from 'base/progress-circle/progress-circle'
 import {playMode} from 'common/js/config'
 import {getRandomInt}  from 'common/js/util'
 import Lyric from 'lyric-parser'
+import Scroll from 'base/scroll/scroll'
 const  transform=prefixStyle('transform');
 	export default{
 		data(){
@@ -111,6 +128,7 @@ const  transform=prefixStyle('transform');
 				progressCircleWidth:32,
 				randomModeTime:0,
 				currentLyric:null,
+				currentLineNum:0,
 			}
 		},
 		computed:{
@@ -331,10 +349,19 @@ const  transform=prefixStyle('transform');
 			},
 			getLyric(){
 				this.currentSong.getLyric().then((lyric)=>{
-					this.currentLyric =new Lyric(lyric)
+					console.log(lyric);
+					this.currentLyric =new Lyric(lyric,this.handleLyric);
+					if(this.playing){
+						this.currentLyric.play()
+					}
 					console.log(this.currentLyric);
 
 				});
+			},
+			handleLyric({lineNum,txt}){
+				this.currentLineNum=lineNum;
+
+
 			},
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
@@ -395,6 +422,7 @@ const  transform=prefixStyle('transform');
 		components:{
 			progressBar,
 			progressCircle,
+			Scroll,
 		},
 
 	}
@@ -447,36 +475,62 @@ const  transform=prefixStyle('transform');
 				}
 			}
 			.middle{
-				position: absolute;
-				top:40%;
-				left:50%;
+				position: fixed;				
+				top:80px;
+				bottom:170px;
 				width:100%;
-				transform:translate(-50%,-50%);
+				font-size:0;
+				white-space:nowrap; //保证两页
 				.middle-l{
+					display:inline-block;
 					width:100%;
+					// padding-top:80%;
+					// height:0;
 					.cd-wrapper{
+						position: absolute;
+						top:10%;
+						left:10%;
 						width:80%;
-						margin:0 auto;						
-					}
-					.cd{
-						width:100%;
-						height:100%;
-						border-radius:50%;
-						box-sizing: border-box;
-						border:10px solid rgba(255,255,255,0.1);
-						img{
+						// margin:0 auto;	
+						.cd{
 							width:100%;
 							height:100%;
 							border-radius:50%;
-						}
-						&.rotate{
-							animation: rotate 18s linear infinite;
+							box-sizing: border-box;
+							border:10px solid rgba(255,255,255,0.1);
+							img{
+								width:100%;
+								height:100%;
+								border-radius:50%;
+							}
+							&.rotate{
+								animation: rotate 18s linear infinite;
+							}
+							&.rotateStop{
+								animation-play-state:paused;
+							}
 
-						}
-						&.rotateStop{
-							animation-play-state:paused;
-						}
+						}					
+					}					
+				}
+				.middle-r{
+					display:inline-block;
+					width:100%;
+					height:100%;
+					overflow:hidden;
+					.lyric-wrapper{
+						width:80%;
+						margin:0 auto;
+						text-align:center;
+						.text{
+							line-height:32px;
+							font-size: $font-size-medium;
+							color: $color-text-l;
+							&.current{
+								color: $color-text;
 
+							}
+						}
 					}
 
 				}
