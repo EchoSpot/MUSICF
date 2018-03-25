@@ -101,6 +101,7 @@ import progressBar from 'base/progress-bar/progress-bar'
 import progressCircle from 'base/progress-circle/progress-circle'
 import {playMode} from 'common/js/config'
 import {getRandomInt}  from 'common/js/util'
+import Lyric from 'lyric-parser'
 const  transform=prefixStyle('transform');
 	export default{
 		data(){
@@ -109,6 +110,7 @@ const  transform=prefixStyle('transform');
 				songReady:false,
 				progressCircleWidth:32,
 				randomModeTime:0,
+				currentLyric:null,
 			}
 		},
 		computed:{
@@ -327,6 +329,13 @@ const  transform=prefixStyle('transform');
 				this.currentTime=currentTime;
 				this.$refs.audio.currentTime=currentTime;
 			},
+			getLyric(){
+				this.currentSong.getLyric().then((lyric)=>{
+					this.currentLyric =new Lyric(lyric)
+					console.log(this.currentLyric);
+
+				});
+			},
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
 				//小cd
@@ -372,7 +381,7 @@ const  transform=prefixStyle('transform');
 					if(this.playing){
 						audio.play();
 					}
-					newSong.getLyric();					
+					this.getLyric();					
 				});
 			},
 			playing(newVal,oldVal){		
