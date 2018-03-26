@@ -17,16 +17,17 @@
 					<h2 class="subtitle" v-html='currentSong.singer'></h2>
 				</div>
 
-				<div class="middle">
+				<div class="middle"
+					 @touchstart.prevent='middleTouchStart'
+					 @touchmove.prevent='middleTouchMove'
+					 @touchend='middleTouchEnd'	
+				>
 					<div class="middle-l">
 						<div class="cd-wrapper" ref="cdWrapper">
 							<div class="cd" ref='cd' :class='isRotate'>
 								<img :src="currentSong.image" alt="tupain">
 							</div>
 						</div>
-						<!-- <div class="playing-lyric-wrapper">
-						  <div class="playing-lyric">{{playingLyric}}</div>
-						</div> -->
 					</div>
 					<scroll class="middle-r" 
 							ref='lyricList' 
@@ -42,11 +43,10 @@
 					</scroll>
 				</div>
 				<div class="bottom">
-					<!-- <div class="dot-wrapper">
-						<span class="dot"></span>
-						<span class="dot"></span>
-					</div> -->
-
+					<div class="dot-wrapper">
+						<span class="dot" :class="{'active':currentShow==='cd'}"></span>
+						<span class="dot" :class="{'active':currentShow==='lyric'}"></span>
+					</div>
 					<!-- 进度条 -->
 					<div class="progress-wrapper">
 						<span class="time time-l">{{format(currentTime)}}</span>
@@ -121,6 +121,9 @@ import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
 const  transform=prefixStyle('transform');
 	export default{
+		created(){
+			this.touch={}
+		},
 		data(){
 			return {
 				currentTime:0,
@@ -129,6 +132,7 @@ const  transform=prefixStyle('transform');
 				randomModeTime:0,
 				currentLyric:null,
 				currentLineNum:0,
+				currentShow:'cd',
 			}
 		},
 		computed:{
@@ -363,6 +367,70 @@ const  transform=prefixStyle('transform');
 
 
 			},
+			middleTouchStart(e){
+				this.touch.initiated=true;
+				this.touch.moved=false;
+				
+				const touch=e.touches[0];
+				this.touch.startX=touch.pageX;
+				this.touch.startY=touch.pageY;
+			},
+			middleTouchMove(e){
+				if(!this.touch.initiated){
+					return
+				}
+				const touch=e.touches[0];
+				let deltaX=touch.pageX-this.touch.startX;
+				let deltaY=touch.pageY-this.touch.startY;
+				if(Math.abs(deltaY)>Math.abs(deltaX)){
+					return 
+				}	
+				this.touch.percent=Math.abs(deltaX/window.innerWidth);
+                let left=this.currentShow==='cd' ? 0 :-window.innerWidth;
+                let offsetLeft=Math.min(Math.max(-window.innerWidth,left+deltaX),0);
+                
+
+ 			    const lyricList=this.$refs.lyricList.$el;
+ 			    const cdWrapper=this.$refs.cdWrapper;
+				lyricList.style[transform]=`translate(${offsetLeft}px,0)`;
+				if(this.currentShow==='cd'){
+					cdWrapper.style.opacity=1-this.touch.percent;
+				}else if(this.currentShow==='lyric'){
+					cdWrapper.style.opacity=this.touch.percent;
+				}
+				
+				console.log('move'+touch.pageX);
+				if(!this.touch.moved){
+					this.touch.moved=true;
+				}
+
+				// if()
+
+			},
+			middleTouchEnd(){
+				if(!this.touch.moved){
+					return
+				}
+				const lyricList=this.$refs.lyricList.$el;
+				const cdWrapper=this.$refs.cdWrapper;
+				let offsetWidth
+				if(this.currentShow==='cd'){
+					if(this.touch.percent>0.1){
+						offsetWidth=-window.innerWidth;
+						cdWrapper.style.opacity=0;
+						this.currentShow='lyric';
+					}
+
+				}else if(this.currentShow==='lyric'){
+					offsetWidth=0;
+					cdWrapper.style.opacity=1;
+					this.currentShow='cd';
+
+				}
+
+				lyricList.style[transform]=`translate(${offsetWidth}px,0)`;
+
+			},
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
 				//小cd
@@ -484,6 +552,7 @@ const  transform=prefixStyle('transform');
 				.middle-l{
 					display:inline-block;
 					width:100%;
+					height:100%;
 					// padding-top:80%;
 					// height:0;
 					.cd-wrapper{
@@ -519,8 +588,6 @@ const  transform=prefixStyle('transform');
 					height:100%;
 					overflow:hidden;
 					.lyric-wrapper{
-						width:80%;
-						margin:0 auto;
 						text-align:center;
 						.text{
 							line-height:32px;
@@ -539,6 +606,21 @@ const  transform=prefixStyle('transform');
 				position: absolute;
 				width:100%;
 				bottom:50px;
+				.dot-wrapper{
+					width:100%;
+					text-align:center;
+					.dot{
+						display: inline-block;
+						width:8px;
+						height:8px;
+						border-radius: 50%;
+						background-color: $color-text-l;
+						&.active{
+							background-color:$color-theme;
+						}
+
+					}
+				}
 				.progress-wrapper{
 					display:flex;
 					align-items:center;
