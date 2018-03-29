@@ -108,6 +108,10 @@
 			}
 		},
 		methods:{
+			refresh(){
+				this.$refs.scroll.refresh();
+
+			},
 			//侧边滑动
 			sliderTouchStart(e){
 				//获取点击的元素

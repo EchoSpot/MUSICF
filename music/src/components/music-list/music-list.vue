@@ -38,10 +38,12 @@ import SongList from '@/base/song-list/song-list'
 import {prefixStyle} from '@/common/js/dom'
 import {mapActions} from 'vuex'
 import {getRandomInt} from 'common/js/util'
+import {playlistMixin} from 'common/js/mixin'
 	const RESERVED_HEIGHT=40;
 
 	const transform =prefixStyle('transform')
-	export default{		
+	export default{	
+	    mixins:[playlistMixin],
 		props:{
 			data:{
 				type:Array,
@@ -75,6 +77,11 @@ import {getRandomInt} from 'common/js/util'
 			this.minTop=RESERVED_HEIGHT-ImageClientHeight;
 		},
 		methods:{
+			handlePlaylist(playlist){
+				const bottom=playlist.length > 0 ? '60px' : '';
+				this.$refs.list.$el.style.bottom=bottom;
+				this.$refs.list.refresh();
+			},
 			back(){
 				this.$router.back();
 			},
