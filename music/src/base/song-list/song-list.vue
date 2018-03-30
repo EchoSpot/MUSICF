@@ -46,7 +46,7 @@
 			height: 64px;
 			font-size:$font-size-medium;
 			.content{
-				display:1;
+				flex:1;
 				line-height: 20px;
 				text-align:left;
 				padding:10px 0;
@@ -56,8 +56,11 @@
 
 				}
 				.desc{
+					width:100%;
+					height:20px;
 					color: $color-text-d;
-					@inclue no-wrap;
+					@include no-wrap;
+
 
 				}
 			}

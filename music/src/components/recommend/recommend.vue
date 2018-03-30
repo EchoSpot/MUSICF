@@ -14,7 +14,10 @@
 				<div class="recommend-list" >
 					<h1 class="list-title">热门歌单推荐</h1>
 					<div class="remd_ul clearfix">
-						<a href="#" class="remd_li"  v-for="item in discList.slice(0,3)">
+						<a href="#" class="remd_li"  
+							v-for="item in discList.slice(0,3)"
+							@click='selectItem(item)'
+						>
 							<div class="remd_img">
 								<img v-lazy="item.imgurl" @load="loadImage">
 							</div>
@@ -23,7 +26,10 @@
 						</a>
 					</div>
 					<div class="remd_ul clearfix">
-						<a href="#" class="remd_li"  v-for="item in discList.slice(3,6)">
+						<a  href="#" class="remd_li"  
+							v-for="item in discList.slice(3,6)
+							@click='selectItem(item)'
+						">
 							<div class="remd_img">
 								<img v-lazy="item.imgurl" >
 							</div>
@@ -32,7 +38,7 @@
 						</a>
 					</div>
 					<ul class="list">
-						<li class="item" v-for="item in discList" @click="selectItem(item)">
+						<li class="item" v-for="item in discList.slice(6)" @click="selectItem(item)">
 							<div class="icon">
 								<img v-lazy="item.imgurl" alt="tupia" width="60px" >
 							</div>
@@ -47,7 +53,8 @@
 			<div class="loading-wrap" v-show="!discList.length">
 				<loading ></loading>
 			</div>	
-		</scroll>	
+		</scroll>
+		<router-view></router-view>		
 	</div>	
 </template>
 <script >
@@ -57,6 +64,7 @@
 	import  Scroll from '@/base/scroll/scroll'
 	import  Loading from '@/base/loading/loading'
 	import  {playlistMixin} from 'common/js/mixin'
+	import  {mapMutations} from 'vuex'
 	export default{
 		mixins:[playlistMixin],
 		created () {
@@ -70,6 +78,10 @@
 			}
 		},
 		methods:{
+			...mapMutations({
+				setDisc:'SET_DISC',
+			}),
+			//mixin，处理miniPlayer 高度问题
 			handlePlaylist(playlist) {
 			  const bottom = playlist.length > 0 ? '60px' : ''
 
@@ -80,7 +92,6 @@
 			_getRecommend() {
 				getRecommend().then((res) => {
 					if(res.code === ERR_OK ){						
-						console.log(res.data);
 						this.slider=res.data.slider;					
 					}
 				})
@@ -99,8 +110,12 @@
 				let result=(num/10000).toFixed(1);
 				return num>=100000?result+'万':num;
 			},
+			//点击事件
 			selectItem(item){
-				// item.encrypt_uin
+				this.$router.push({
+					path:`/recommend/${item.dissid}`
+				})
+				this.setDisc(item);
 			},
 			//保证图片资源撑开了高度，不影响better-scroll撑开高度
 			loadImage(){

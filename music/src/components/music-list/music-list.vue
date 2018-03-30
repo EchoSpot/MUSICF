@@ -3,7 +3,9 @@
 		<div class="back" @click='back'>
 			<i class="icon-back"></i>
 		</div>
-		<h1 class="title" v-html='name'></h1>
+		<h1 class="title">
+			<div class="text"  v-html='name'></div>
+		</h1>
 		<div class="bg-image" :style='bgStyle' ref='image'>
 			<div class="filter"></div>
 			<div class="play-wrap" ref='playWrap'>
@@ -188,12 +190,17 @@ import {playlistMixin} from 'common/js/mixin'
 			left:0;
 			top:0;
 			z-index:210;
-			width:100%;
+			width:100%;		
 			text-align:center;
 			height:40px;
-			line-height:40px;
-			font-size: $font-size-large;
-			color: $color-text;
+			line-height:40px;			
+			.text{
+				width:70%;
+				margin:0 auto;
+				font-size: $font-size-large;
+				color: $color-text;
+				@include no-wrap;
+			}
 		}
 
 		.bg-image{

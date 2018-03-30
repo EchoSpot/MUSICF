@@ -38,3 +38,22 @@ export function getDiscList() {
     return Promise.resolve(res.data)
   })
 }
+
+export function getCDList(id){
+  const url='/api/getCDList'
+  const data=Object.assign({},commonParams,{
+    type: 1,
+    json: 1,
+    onlysong: 0,
+    disstid: id,
+    format: 'json',
+    g_tk: 1963797465,
+    platform: 'yqq',
+    needNewCode: 0,
+  })
+  return axios.get(url,{
+    params:data
+  }).then((res)=>{
+    return Promise.resolve(res.data)
+  })
+}
