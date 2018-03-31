@@ -25,7 +25,7 @@
 			@scroll='scroll'
 		>
 			<div class="song-list-wrapper">
-				<song-list :list='data' @select='selectItem'></song-list>
+				<song-list :list='data' @select='selectItem' :rank='rank'></song-list>
 			</div>
 			<div v-show='!data.length' class="loading-wrapper">
 				<loading></loading>				
@@ -58,6 +58,10 @@ import {playlistMixin} from 'common/js/mixin'
 			image:{
 				type:String,
 				default:''
+			},
+			rank:{
+				type:Boolean,
+				default:false
 			}
 		},
 		data(){

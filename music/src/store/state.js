@@ -9,8 +9,9 @@ const state={
 	mode:playMode.sequence,
 	currentIndex: -1,
 	
-	disc:{},
-	topList:{},
+	disc:{}, //recommend页面
+	topList:{},  //rank页面
+	
 
 
 }
