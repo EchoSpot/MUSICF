@@ -11,3 +11,15 @@ body, html{
   color: $color-text;
   text-align:center;
   }
+
+.clearfix:after{
+  content:'';
+  display: block;
+  clear:both;
+}
+.fl{
+  float:left;
+}
+.fr{
+  float:right;
+}

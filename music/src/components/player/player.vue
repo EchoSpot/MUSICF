@@ -571,6 +571,7 @@ const  transitionDuration = prefixStyle('transitionDuration');
 			top:0;
 			right:0;
 			bottom:0;
+			z-index:201;
 			background:$color-background;
 			.background{
 				position: absolute;

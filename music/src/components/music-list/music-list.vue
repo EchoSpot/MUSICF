@@ -15,6 +15,7 @@
 				</div>
 			</div>
 		</div>
+		<!-- 往上移动的黑色的板（动画效果） -->
 		<div class="bg-layer" ref='layer'></div>
 		<scroll  
 			:data='data'
@@ -83,6 +84,7 @@ import {playlistMixin} from 'common/js/mixin'
 			this.minTop=RESERVED_HEIGHT-ImageClientHeight;
 		},
 		methods:{
+			//mixin的函数
 			handlePlaylist(playlist){
 				const bottom=playlist.length > 0 ? '60px' : '';
 				this.$refs.list.$el.style.bottom=bottom;
