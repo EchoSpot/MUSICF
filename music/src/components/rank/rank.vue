@@ -95,6 +95,7 @@ import Loading from 'base/loading/loading'
 				margin:0 20px;
 				padding-top:20px;
 				height:100px;
+				overflow:hidden;
 				.icon{
 					flex:0 0 100px;
 					width:100px;
@@ -112,7 +113,7 @@ import Loading from 'base/loading/loading'
 					padding: 0 20px;
 					background: $color-highlight-background;
 					.song{
-						width:100%;
+						width: 76%;
 						line-height:26px;
 						color: $color-text-d;
 						font-size: $font-size-small;
