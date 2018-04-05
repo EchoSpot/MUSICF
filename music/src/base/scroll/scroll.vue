@@ -30,6 +30,11 @@
 				type:Boolean,
 				default:false
 			},
+			//在滚动之前
+			beforeScroll:{
+				type:Boolean,
+				default:false
+			}
 		},
 		mounted() {
 			this.$nextTick(() => {				
@@ -55,12 +60,18 @@
 					})
 
 				};
-				//在拉到接近底部的时候，触发事件
+				//在拉到接近底部的时候，触发事件.运用于suggest.vue的下拉刷新
 				if(this.pullup){
 					this.scroll.on('scrollEnd',() => {
 						if(this.scroll.y <= (this.scroll.maxScrollY+50)){
 							this.$emit('scrollToEnd');
 						}
+					})
+				};
+				//在滚动之前，运用在suggest.vue 判断聚焦的时候使键盘放下
+				if(this.beforeScroll){
+					this.scroll.on('beforeScrollStart',()=>{
+						this.$emit('beforeScroll')
 					})
 				}
 

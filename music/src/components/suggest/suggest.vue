@@ -3,7 +3,9 @@
 			 ref='suggestScroll'
 	         :data='list'
 	         :pullup='pullup' 
-	         @scrollToEnd='searchMore'>
+	         :beforeScroll='beforeScroll'
+	         @scrollToEnd='searchMore'
+	         @beforeScroll='listScroll'>
 		<ul class="suggest-list">
 			<li v-for='item in list' class="suggest-item" @click='suggestItemClick(item)'>				
 				<div class="icon">
@@ -49,6 +51,7 @@ import Singer from 'common/js/singer'
 				page:1, //页码
 				pullup:true, //betterScroll是否监听滚动到末尾的事件 
 				hasMore:false, //数据是否加载完
+				beforeScroll:true, //在滚动之前,传递给scroll的参数
 			}
 		},
 		methods:{
@@ -128,6 +131,10 @@ import Singer from 'common/js/singer'
 				}
 				
 
+			},
+			//滚动前，
+			listScroll(){
+				this.$emit('scrollStart');
 			},
 			//检查是否还有下一页
 			_checkMore(data){

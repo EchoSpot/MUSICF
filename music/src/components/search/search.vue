@@ -23,7 +23,11 @@
 			</div>			
 		</div>		
 		<div class="search-result" v-show='query' ref='result'>
-			<suggest :query='query' :showSinger='showSinger' @selectItem='suggestItemSelect'></suggest>
+			<suggest 
+			:query='query' 
+			:showSinger='showSinger' 
+			@selectItem='suggestItemSelect'
+			@scrollStart='keyBoardDown'></suggest>
 		</div>
 		<router-view></router-view>
 	</div>	
@@ -70,6 +74,11 @@ import Suggest from 'components/suggest/suggest'
 					})
 				}
 				
+			},
+			//开始滚动
+			keyBoardDown(){
+				this.$refs.searchBox.blur();
+
 			},
 			_getHotKey(){
 				getHotKey().then((res)=>{
