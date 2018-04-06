@@ -4,23 +4,25 @@
 			<search-box ref='searchBox' @query='searchQuery'></search-box>
 		</div>
 		<div class="shortcutWrap" v-show='!query'>
-			<div class="hotKey">
-				<h1 class="title">热门搜索</h1>
-				<ul>
-					<li v-for='item in hotKey' @click='hotKeySearch(item.k)' class="item">
-						<span>{{item.k}}</span>
-					</li>
-				</ul>		
-			</div>
-			<div class="search-history">
-				<h1 class="title clearfix">
-					<span class="text fl">搜索历史</span>
-					<span class="icon-clear fr"></span>
-				</h1>
-				<ul class="history-ul">
-					<li class="history-item"></li>					
-				</ul>
-			</div>			
+			<scroll :data='searchHistory'>
+				<div class="hotKey">
+					<h1 class="title">热门搜索</h1>
+					<ul>
+						<li v-for='item in hotKey' @click='valueSearch(item.k)' class="item">
+							<span>{{item.k}}</span>
+						</li>
+					</ul>		
+				</div>
+				<div class="search-history" v-show='searchHistory.length'>
+					<h1 class="title clearfix">
+						<span class="text fl">搜索历史</span>
+						<span class="icon fr" @click='cleraAll'>
+							<i class="icon-clear"></i>
+						</span>
+					</h1>
+					<search-list @searchHistoryItemSelected='valueSearch'></search-list>
+				</div>	
+			</scroll>		
 		</div>		
 		<div class="search-result" v-show='query' ref='result'>
 			<suggest 
@@ -29,6 +31,7 @@
 			@selectItem='suggestItemSelect'
 			@scrollStart='keyBoardDown'></suggest>
 		</div>
+		<confirm ref='confirm' @btnConfirm='confirm'></confirm>
 		<router-view></router-view>
 	</div>	
 </template>
@@ -38,7 +41,10 @@ import {getHotKey} from 'api/search'
 import {playlistMixin} from 'common/js/mixin'
 import {ERR_OK} from 'api/config'
 import Suggest from 'components/suggest/suggest'
-import {mapActions} from 'vuex'
+import {mapActions,mapGetters} from 'vuex'
+import SearchList from 'base/search-list/search-list'
+import Scroll from 'base/scroll/scroll'
+import Confirm from 'base/confirm/confirm'
 	export default{
 		mixins:[playlistMixin],
 		created(){
@@ -53,36 +59,46 @@ import {mapActions} from 'vuex'
 			}
 
 		},
+		computed:{
+			...mapGetters([
+				'searchHistory'
+			])
+
+		},
 		methods:{
 			...mapActions([
-				'saveSearchHistory'
+				'saveSearchHistory',
+				'deleteAllSearchHistory'
 			]),
 			handlePlaylist(playlist){
 				const bottom=playlist.length>0?'60px':0;
 				this.$refs.result.style.bottom=bottom;
 			},
 			//热门搜索点击的时候
-			hotKeySearch(value){
+			valueSearch(value){
 				this.$refs.searchBox.setQuery(value);
 			},
-			// emit函数，从searchBox得到输入值
+			// searchBox输入值改变的时候，emit函数
 			searchQuery(queryString){
 				this.query=queryString;
 				
 			},
-			//点击搜索结果的时候
+			//Suggest组件，点击搜索结果的时候
 			suggestItemSelect(data){
 				if(data.type === 'singer'){
 					this.$router.push({
 						path:`/search/${data.mid}`
 					})
-					this.saveSearchHistory(data.singername);
-				}else{
-					//item.name +"  -  "+item.singer
-					this.saveSearchHistory(`${data.name}   ${data.singer}`);
 				}
+				this.saveSearchHistory(this.query);		
+			},
+			//清除历史记录
+			cleraAll(){
+				this.$refs.confirm.show();
+			},
+			confirm(){
+				this.deleteAllSearchHistory();
 
-				
 			},
 			//开始滚动
 			keyBoardDown(){
@@ -100,6 +116,9 @@ import {mapActions} from 'vuex'
 		components:{
 			SearchBox,
 			Suggest,
+			SearchList,
+			Scroll,
+			Confirm,
 
 		}
 	}
@@ -140,17 +159,16 @@ import {mapActions} from 'vuex'
 					margin-bottom: 20px;
 					font-size: $font-size-medium;
 					color: $color-text-l;
-				}				
-				.icon-clear{
-					font-size:$font-size-medium;
-					color:$color-text-d;
 				}
+				.icon{
+					@include extend-click;
+					.icon-clear{						
+						font-size:$font-size-medium;
+						color:$color-text-d;
+					}
+				}				
 				
-
-
 			}
-
-
 		}
 		.search-result{
 			position: fixed;

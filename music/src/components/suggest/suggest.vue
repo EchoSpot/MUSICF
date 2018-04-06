@@ -119,16 +119,12 @@ import Singer from 'common/js/singer'
 				     	name:item.singername
 				     });									     					
 					this.setSinger(singer); //vuex 保存歌手信息
-					item=Object.assign({},singer,{
-						type:TYPE_SINGER
-					})
 
 				}else{ //如果点击的是歌曲的话
 					//调用vue actions 
 					this.insertSong(item);
 				}
 				//派发监听事件，用于监听点击，用于查看历史记录
-				console.log(item);
 				this.$emit('selectItem',item)
 				
 

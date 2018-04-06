@@ -1,5 +1,5 @@
 import {playMode} from 'common/js/config.js'
-
+import {getSearch} from 'common/js/cache'
 const state={
 	singer:{},
 	playing:false,
@@ -11,7 +11,7 @@ const state={
 	
 	disc:{}, //recommend页面
 	topList:{},  //rank页面
-	searchHistory:[], //搜素历史
+	searchHistory:getSearch(), //搜素历史
 	
 
 

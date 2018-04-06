@@ -41,3 +41,35 @@ export function saveSearch(value){
 	return array;
 
 }
+
+/**
+ *获取历史记录，在vuex中显示
+ * @return {[type]} [description]
+ */
+export function getSearch(){
+	let history=window.localStorage.getItem(SEARCH_KEY);
+	if(history){
+		return JSON.parse(history);
+	}else{
+		return new Array()
+	}
+
+}
+/**
+ * 删除一条历史记录
+ */
+export function deleteOneSearch(index){
+	let array=JSON.parse(window.localStorage.getItem(SEARCH_KEY));
+	array.splice(index,1);
+	window.localStorage.setItem(SEARCH_KEY,JSON.stringify(array));
+	return array;
+
+}
+
+/**
+ * 删除所有搜索记录
+ */
+export function deleteAllSearch(){
+	window.localStorage.removeItem(SEARCH_KEY);
+	return [];
+}

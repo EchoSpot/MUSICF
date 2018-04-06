@@ -1,5 +1,5 @@
 import * as types from './mutation-types'
-import {saveSearch} from 'common/js/cache'
+import {saveSearch,deleteOneSearch,deleteAllSearch} from 'common/js/cache'
 export const selectPlay=function({commit,state},{list,index}){
 	commit(types.SET_SEQUENCE_LIST,list)
 	commit(types.SET_PLAYLIST,list)
@@ -24,8 +24,13 @@ export const insertSong=function({commit,state},song){
 
 }
 export const saveSearchHistory=function({commit},search){
-	console.log(search);
-	let array=saveSearch(search);
-	commit(types.SET_SEARCH_HISTORY,array);
+	commit(types.SET_SEARCH_HISTORY,saveSearch(search));
 
+}
+export const deleteOneSearchHistory=function({commit},index){
+	commit(types.SET_SEARCH_HISTORY,deleteOneSearch(index));
+}
+
+export const deleteAllSearchHistory=function({commit}){
+	commit(types.SET_SEARCH_HISTORY,deleteAllSearch())
 }
