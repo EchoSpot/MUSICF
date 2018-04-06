@@ -71,6 +71,7 @@ import Singer from 'common/js/singer'
 					console.log(res);
 					if(res.code===ERR_OK){
 						this.list=this._normalizeData(res.data);
+						console.log(this.list);
 						this._checkMore(res.data); //判断是否还有数据，
 					}
 					
@@ -117,18 +118,18 @@ import Singer from 'common/js/singer'
 				     	mid:item.singermid,
 				     	name:item.singername
 				     });									     					
-					this.setSinger(singer);
-					let data=Object.assign({},singer,{
+					this.setSinger(singer); //vuex 保存歌手信息
+					item=Object.assign({},singer,{
 						type:TYPE_SINGER
 					})
-					this.$emit('selectItem',data)	
 
 				}else{ //如果点击的是歌曲的话
-					console.log(item);
+					//调用vue actions 
 					this.insertSong(item);
-
-
 				}
+				//派发监听事件，用于监听点击，用于查看历史记录
+				console.log(item);
+				this.$emit('selectItem',item)
 				
 
 			},

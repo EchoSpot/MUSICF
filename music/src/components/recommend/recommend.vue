@@ -27,9 +27,9 @@
 					</div>
 					<div class="remd_ul clearfix">
 						<a  href="#" class="remd_li"  
-							v-for="item in discList.slice(3,6)
+							v-for="item in discList.slice(3,6)"
 							@click='selectItem(item)'
-						">
+						>
 							<div class="remd_img">
 								<img v-lazy="item.imgurl" >
 							</div>

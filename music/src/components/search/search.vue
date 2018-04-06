@@ -38,6 +38,7 @@ import {getHotKey} from 'api/search'
 import {playlistMixin} from 'common/js/mixin'
 import {ERR_OK} from 'api/config'
 import Suggest from 'components/suggest/suggest'
+import {mapActions} from 'vuex'
 	export default{
 		mixins:[playlistMixin],
 		created(){
@@ -53,6 +54,9 @@ import Suggest from 'components/suggest/suggest'
 
 		},
 		methods:{
+			...mapActions([
+				'saveSearchHistory'
+			]),
 			handlePlaylist(playlist){
 				const bottom=playlist.length>0?'60px':0;
 				this.$refs.result.style.bottom=bottom;
@@ -72,7 +76,12 @@ import Suggest from 'components/suggest/suggest'
 					this.$router.push({
 						path:`/search/${data.mid}`
 					})
+					this.saveSearchHistory(data.singername);
+				}else{
+					//item.name +"  -  "+item.singer
+					this.saveSearchHistory(`${data.name}   ${data.singer}`);
 				}
+
 				
 			},
 			//开始滚动

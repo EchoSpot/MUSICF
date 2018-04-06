@@ -11,6 +11,7 @@ const state={
 	
 	disc:{}, //recommend页面
 	topList:{},  //rank页面
+	searchHistory:[], //搜素历史
 	
 
 
