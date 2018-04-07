@@ -96,6 +96,7 @@ import Confirm from 'base/confirm/confirm'
 			cleraAll(){
 				this.$refs.confirm.show();
 			},
+			//点击确认按钮后，确认
 			confirm(){
 				this.deleteAllSearchHistory();
 

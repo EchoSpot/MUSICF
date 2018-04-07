@@ -48,11 +48,9 @@
 			&.list-enter-active,
 			&.list-leave-active{
 				transition:all .5s;
-
 			}
 			&.list-enter,&.list-leave-to{
 				height:0
-
 			}
 			.text{
 				flex:1;

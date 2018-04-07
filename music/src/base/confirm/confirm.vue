@@ -1,15 +1,17 @@
 <template>
-	<div class="confirm" v-show='showFlag'>
-		<div class="confirm-wrap">
-			<div class="confirm-content">
-				<p class="text">{{text}}</p>
-				<div class="operate">
-					<div class="operate-btn btn-cancel"  @click='cancel'>{{cancelBtnText}}</div>
-					<div class="operate-btn btn-confirm" @click='confirm'>{{confirmBtnText}}</div>
+	<transition name='confirm-fade'>
+		<div class="confirm" v-show='showFlag'>
+			<div class="confirm-wrap">
+				<div class="confirm-content">
+					<p class="text">{{text}}</p>
+					<div class="operate">
+						<div class="operate-btn btn-cancel"  @click='cancel'>{{cancelBtnText}}</div>
+						<div class="operate-btn btn-confirm" @click='confirm'>{{confirmBtnText}}</div>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	</transition>
 </template>
 <script >
  export default{
@@ -61,6 +63,15 @@
 	bottom:0;
 	z-index:999;
 	background-color:$color-background-d ;
+	&.confirm-fade-enter-active{
+		animation:confirm-fadein .3s;
+		.confirm-content{
+			animation:confirm-zoom .3s;
+		}
+	}
+	&.confirm-fade-enter,&.confirm-fade-leave-to{
+
+	}
 	.confirm-wrap{
 		position: absolute;
 		top:50%;
@@ -80,11 +91,17 @@
 			.operate{
 				display: flex;
 				align-items:center;
+				font-size: $font-size-large;
 				.operate-btn{
+					flex:1;
 					height: 22px;
 					line-height: 22px;
-					flex:1;
 					color: $color-text-d;
+					padding:10px 0;
+					border-top:1px solid $color-background-d;
+					&.btn-cancel{
+						border-right:1px solid $color-background-d;
+					}
 				}
 
 
@@ -94,5 +111,14 @@
 
 }
 
+@keyframes confirm-fadein{
+	0%{opacity:0}	
+	100%{opacity: 1}	
+}
+@keyframes confirm-zoom{
+	0%{transform:scale(0)}
+	50%{transform:scale(1.1)}
+	100%{transform:scale(1)}
+}
 	
 </style>
