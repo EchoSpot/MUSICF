@@ -3,25 +3,27 @@
 		<div class="search-box-wrap">
 			<search-box ref='searchBox' @query='searchQuery'></search-box>
 		</div>
-		<div class="shortcutWrap" v-show='!query'>
-			<scroll :data='searchHistory'>
-				<div class="hotKey">
-					<h1 class="title">热门搜索</h1>
-					<ul>
-						<li v-for='item in hotKey' @click='valueSearch(item.k)' class="item">
-							<span>{{item.k}}</span>
-						</li>
-					</ul>		
+		<div class="shortcutWrap" v-show='!query' ref='shortcutWrap'>
+			<scroll :data='shortcut' class='shortcut' ref='shortcut'>
+				<div>
+					<div class="hotKey">
+						<h1 class="title">热门搜索</h1>
+						<ul>
+							<li v-for='item in hotKey' @click='valueSearch(item.k)' class="item">
+								<span>{{item.k}}</span>
+							</li>
+						</ul>		
+					</div>
+					<div class="search-history" v-show='searchHistory.length'>
+						<h1 class="title clearfix">
+							<span class="text fl">搜索历史</span>
+							<span class="icon fr" @click='cleraAll'>
+								<i class="icon-clear"></i>
+							</span>
+						</h1>
+						<search-list @searchHistoryItemSelected='valueSearch'></search-list>
+					</div>	
 				</div>
-				<div class="search-history" v-show='searchHistory.length'>
-					<h1 class="title clearfix">
-						<span class="text fl">搜索历史</span>
-						<span class="icon fr" @click='cleraAll'>
-							<i class="icon-clear"></i>
-						</span>
-					</h1>
-					<search-list @searchHistoryItemSelected='valueSearch'></search-list>
-				</div>	
 			</scroll>		
 		</div>		
 		<div class="search-result" v-show='query' ref='result'>
@@ -29,7 +31,8 @@
 			:query='query' 
 			:showSinger='showSinger' 
 			@selectItem='suggestItemSelect'
-			@scrollStart='keyBoardDown'></suggest>
+			@scrollStart='keyBoardDown'
+			ref='suggest'></suggest>
 		</div>
 		<confirm ref='confirm' @btnConfirm='confirm'></confirm>
 		<router-view></router-view>
@@ -62,8 +65,11 @@ import Confirm from 'base/confirm/confirm'
 		computed:{
 			...mapGetters([
 				'searchHistory'
-			])
-
+			]),
+			//传递给scroll的data
+			shortcut(){
+				return this.hotKey.concat(this.searchHistory)
+			}
 		},
 		methods:{
 			...mapActions([
@@ -73,6 +79,10 @@ import Confirm from 'base/confirm/confirm'
 			handlePlaylist(playlist){
 				const bottom=playlist.length>0?'60px':0;
 				this.$refs.result.style.bottom=bottom;
+				this.$refs.suggest.refresh();
+
+				this.$refs.shortcutWrap.style.bottom=bottom;
+				this.$refs.shortcut.refresh();
 			},
 			//热门搜索点击的时候
 			valueSearch(value){
@@ -114,6 +124,17 @@ import Confirm from 'base/confirm/confirm'
 				})
 			},			
 		},
+		watch:{
+			//搜索后，返回页面能刷新
+			query(newVal){
+				if(!newVal){
+					setTimeout(()=>{
+						this.$refs.shortcut.refresh();
+					}, 20);
+					
+				}
+			}
+		},
 		components:{
 			SearchBox,
 			Suggest,
@@ -134,6 +155,16 @@ import Confirm from 'base/confirm/confirm'
 
 		}
 		.shortcutWrap{
+			position: fixed;
+			top:154px;
+			bottom:0;
+			left:0;
+			right:0;
+			.shortcut{
+				height: 100%;
+				overflow:hidden;
+
+			}
 			.hotKey{
 				margin:0 20px 20px 20px;
 				text-align:left;

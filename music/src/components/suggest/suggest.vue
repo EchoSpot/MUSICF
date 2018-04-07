@@ -61,7 +61,11 @@ import Singer from 'common/js/singer'
 			...mapActions([
 				'insertSong',
 
-			]),			
+			]),
+			//接口，外部调用的刷新方法；	
+			refresh(){
+				this.$refs.suggestScroll.refresh();
+			},	
 			//search内容变更，首次查询获取 数据
 			querySearch(newQuery){
                 this.hasMore=true;

@@ -16,8 +16,6 @@
 		created(){
 			this._getTopList();
 			this.rank=true
-
-
 		},
 		data(){
 			return {
