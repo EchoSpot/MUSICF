@@ -31,17 +31,18 @@
 						</transition-group>
 					</div>
 				</scroll>
-				<div class="list-operate">
+				<div class="list-operate" @click.stop='openAddSong'>
 					<div class="add">
 						<i class="icon-add"></i>
 						<span class="text">添加歌曲到队列</span>
-					</div>
+					</div>					
 				</div>
 				<div class="list-close" @click='hide'>
 					<span>关闭</span>
 				</div>
 			</div>
 			<confirm text='确认清空播放列表吗' ref='confirm' @btnConfirm='clearAll'></confirm>
+			<add-song ref='addSong'></add-song>
 		</div>
 	</transition>
 	
@@ -51,6 +52,7 @@ import {mapGetters,mapMutations,mapActions} from 'vuex'
 import {playMode} from 'common/js/config'
 import Scroll from 'base/scroll/scroll'
 import Confirm from 'base/confirm/confirm'
+import AddSong from 'components/add-song/add-song'
 export default{
 	data(){
 		return{
@@ -133,12 +135,16 @@ export default{
 			this.hide();
 			this.clearPlayList(); //mapActions
 		},
-		
+		openAddSong(){
+			this.$refs.addSong.show();
 
+		},
+		
 	},
 	components:{
 		Scroll,
 		Confirm,
+		AddSong,
 
 	}
 
