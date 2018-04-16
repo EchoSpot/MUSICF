@@ -102,11 +102,12 @@
 						<i class="icon-mini" :class='playIconMini'></i>
 					</progress-circle>
 				</div>
-				<div class="control">
+				<div class="control" @click.stop='openPlayList'>
 					<i class="icon-playlist"></i>
 				</div>					
 			</div>
 		</transition>
+		<play-list ref='playlist'></play-list>
 		<audio :src='currentSong.url' ref='audio' 
 				@timeupdate='timeUpdate'
 				@ended='aduioEnd'
@@ -124,6 +125,7 @@ import {playMode} from 'common/js/config'
 import {getRandomInt}  from 'common/js/util'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import PlayList from 'components/playlist/playlist'
 const  transform=prefixStyle('transform');
 const  transition=prefixStyle('transition');
 const  transitionDuration = prefixStyle('transitionDuration');
@@ -294,6 +296,9 @@ const  transitionDuration = prefixStyle('transitionDuration');
 							index=getRandomInt(0,this.playList.length-1);
 						}
 
+					}else if(this.mode === playMode.loop){
+						this.loop();
+						return 
 					}
 									
 					this.setCurrentIndex(index);
@@ -328,6 +333,9 @@ const  transitionDuration = prefixStyle('transitionDuration');
 						while(index === this.currentIndex){
 							index=getRandomInt(0,this.playList.length-1);
 						}
+					}else if(this.mode === playMode.loop){
+						this.loop();
+						return 
 					}
 					this.setCurrentIndex(index);
 					if(!this.playing){
@@ -348,11 +356,7 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				}
 			},
 			aduioEnd(){
-				if(this.mode == playMode.loop){
-					this.loop();
-				}else{
-					this.next();
-				}				
+				this.next();			
 			},
 			canplay(){
 				this.songReady=true;
@@ -489,6 +493,9 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				this.touch.initiated=false;
 
 			},
+			openPlayList(){
+				this.$refs.playlist.show();
+			},
 			//动画 获取函数初始位置  小cd到大cd
 			_getPosAndScale(){
 				//小cd
@@ -557,6 +564,7 @@ const  transitionDuration = prefixStyle('transitionDuration');
 			progressBar,
 			progressCircle,
 			Scroll,
+			PlayList,
 		},
 
 	}
@@ -746,14 +754,15 @@ const  transitionDuration = prefixStyle('transitionDuration');
 			}
 		}
 		.mini-player{
+			position: fixed;
 			display:flex;
 			align-items:center;
-			position: fixed;
 			bottom:0;
 			left:0;
 			width:100%;
 			height:60px;
 			background-color: $color-highlight-background;
+			z-index: 201;
 			.icon{
 				flex:0 0 40px;
 				width:40px;
@@ -780,6 +789,7 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				line-height: 20px;
 				text-align:left;
 				.name{
+					width:100%;
 					margin-bottom:2px;
 					font-size: $font-size-medium;
 					color: $color-text;

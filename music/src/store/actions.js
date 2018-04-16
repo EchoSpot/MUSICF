@@ -13,8 +13,21 @@ export const insertSong=function({commit,state},song){
 	let currentIndex=state.currentIndex;
 
 	let place=++currentIndex;
-
+	let oldIndex=playlist.findIndex((item,index)=>{
+		return item.id === song.id 
+	});
 	playlist.splice(place,0,song);
+	
+	if(oldIndex !== -1){
+		//如果在插入的位置的前面的话
+		if(oldIndex < place){
+			playlist.splice(oldIndex,1)
+			place--;
+		}else{  //如果插入的位置在后面的话
+			playlist.splice(oldIndex+1,1)
+		}
+		
+	}
 
 	commit(types.SET_FULL_SCREEN,true);
 	commit(types.SET_PLAYLIST,playlist);
@@ -33,4 +46,28 @@ export const deleteOneSearchHistory=function({commit},index){
 
 export const deleteAllSearchHistory=function({commit}){
 	commit(types.SET_SEARCH_HISTORY,deleteAllSearch())
+}
+//playlist组件使用
+export const deleteSong=function({commit,state},index){
+	let playList=state.playList.concat();
+	let currentIndex=state.currentIndex;
+	playList.splice(index,1);
+	if(currentIndex>index || currentIndex == playList.length){
+		currentIndex--;
+	}
+	commit(types.SET_PLAYLIST,playList);
+	commit(types.SET_CURRENT_INDEX,currentIndex);
+	if(!playList.length){
+		commit(types.SET_PLAYING_STATE,false);
+		commit(types.SET_CURRENT_INDEX,-1);
+	}
+	// else{
+	// 	commit(types.SET_PLAYING_STATE,true);
+	// }
+}
+//playlist组件 清空列表
+export const clearPlayList=function({commit}){
+	commit(types.SET_PLAYLIST,[]);
+	conmit(types.SET_CURRENT_INDEX,-1);
+	commit(types.SET_PLAYING_STATE,false);
 }

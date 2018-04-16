@@ -50,7 +50,8 @@
 				transition:all .5s;
 			}
 			&.list-enter,&.list-leave-to{
-				height:0
+				height:0;
+				opacity:0;
 			}
 			.text{
 				flex:1;
