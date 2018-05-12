@@ -41,6 +41,7 @@
 							<div v-if='currentLyric'>
 								<p ref='lyricLine' 
 								class="text"
+								:key="index"
 								:class="{'current':currentLineNum===index}"
 								v-for='(line,index) in currentLyric.lines'>{{line.txt}}</p>
 							</div>
@@ -69,17 +70,17 @@
 						<div class="icon i-left" @click='changeMode'>
 							<i :class="modeIcon"></i>
 						</div>
-						<div class="icon i-left" @click='prev' :class='disableCls'>
+						<div class="icon i-left" @click='prev'>
 							<i class="icon-prev"></i>
 						</div>	
-						<div class="icon i-center"  :class='disableCls'>
+						<div class="icon i-center" >
 							<i  @click="togglePlaying" :class='playIcon'></i>
 						</div>
-						<div class="icon  i-right" @click='next' :class='disableCls'>
+						<div class="icon  i-right" @click='next'>
 							<i class="icon-next"></i>
 						</div>
-						<div class="icon i-right">
-							<i class="icon icon-not-favorite"></i>
+						<div class="icon i-right" @click.stop="toggleFavorite">
+							<i class="icon " :class="getFavoriteIcon"></i>
 						</div> 
 					</div>
 				</div>
@@ -108,15 +109,10 @@
 			</div>
 		</transition>
 		<play-list ref='playlist'></play-list>
-		<audio :src='currentSong.url' ref='audio' 
-				@timeupdate='timeUpdate'
-				@ended='aduioEnd'
-				@canplay='canplay'
-				@error='error'></audio>
 	</div>
 </template>
 <script>
-import { mapGetters,mapMutations } from 'vuex'
+import { mapGetters,mapMutations,mapActions } from 'vuex'
 import animations  from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import progressBar from 'base/progress-bar/progress-bar'
@@ -132,7 +128,8 @@ const  transitionDuration = prefixStyle('transitionDuration');
 
 	export default{
 		created(){
-			this.touch={}
+			this.touch={};
+			this.isFavorite();		
 		},
 		data(){
 			return {
@@ -144,7 +141,20 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				currentLineNum:0,
 				currentShow:'cd',
 				playingLyric:'',
+				favorite:false,
 			}
+		},
+		mounted(){		
+			this.player=new QMplayer({
+				onended: () => {
+					this.next();
+					return false;
+					
+				},
+				ontimeupdate:()=>{
+					this.timeUpdate();
+				},
+			});
 		},
 		computed:{
 			...mapGetters([
@@ -155,6 +165,7 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				'playing',
 				'currentIndex',
 				'mode',
+				'favoriteList',
 			]),
 			//进度百分比
 			percent(){
@@ -167,11 +178,11 @@ const  transitionDuration = prefixStyle('transitionDuration');
 			playIconMini(){
 				return this.playing?'icon-pause-mini':'icon-play-mini'
 			},
-			isRotate(){
-				return this.playing?'rotate':'rotate rotateStop'
+			getFavoriteIcon(){
+				return this.favorite ? 'icon-favorite' : 'icon-not-favorite';			
 			},
-			disableCls(){
-				return this.songReady?'':'disable'
+			isRotate(){
+				return this.playing ? 'rotate' : 'rotate rotateStop'
 			},
 			modeIcon(){
 				const mode=this.mode;
@@ -194,12 +205,31 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				setPlayMode:'SET_PLAY_MODE',
 				setPlayList:'SET_PLAYLIST',
 			}),
+			...mapActions([
+				'savePlayHistory',
+				'saveMusicFavorite',
+				'removeMusicFavorite'
+			]),
 			back(){
 				this.setFullScreen(false);
-
 			},
 			open(){
 				this.setFullScreen(true);
+			},			
+			toggleFavorite(){
+				this.favorite=!this.favorite;
+				this.favorite ? this.saveMusicFavorite(this.currentSong) : this.removeMusicFavorite(this.currentSong)
+			},
+			isFavorite(){
+				let list = this.favoriteList;
+				if(list.length){
+					let index=list.findIndex((item)=>{
+						return item.id === this.currentSong.id;
+					})
+					this.favorite= index === -1 ? false : true;
+				}else{
+					this.favorite=false;
+				}
 			},
 			// //enter，afterEnter,leave,after-leave 都是动画函数 小cd到大cd
 			enter(el,done){
@@ -260,14 +290,10 @@ const  transitionDuration = prefixStyle('transitionDuration');
 
 			},
 			//切换播放
-			togglePlaying(){
-				if(!this.songReady){
-					return
-				}
+			togglePlaying(){				
 				this.setPlayingState(!this.playing);
 				if(this.currentLyric){
 					this.currentLyric.togglePlay();
-
 				}
 			},
 			//切换播放模式图标
@@ -276,11 +302,13 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				this.setPlayMode(modeType);		
 			},			
 			next(){
-				if(!this.songReady){
-					return 
-				}
-				this.currentTime=0;
-				if(this.playList.length===1){
+				// if(!this.songReady){
+				// 	return 
+				// }
+				// this.player.playReady();
+				// console.log(this.player.playReady());
+				// this.currentTime=0;
+				if(this.playList.length === 1){
 					this.loop();
 				}else{
 					let index=-1;
@@ -306,19 +334,12 @@ const  transitionDuration = prefixStyle('transitionDuration');
 					if(!this.playing){
 						this.togglePlaying();
 					}
-					this.songReady=false;
 				}
-
-				
-
 			},
 			prev(){
-				if(!this.songReady){
-					return 
-				}
 				this.currentTime=0;
 				//如果歌曲数为1;
-				if(this.playList.length===1){
+				if(this.playList.length === 1){
 					this.loop();
 				}else{
 					let index=-1;	
@@ -341,25 +362,15 @@ const  transitionDuration = prefixStyle('transitionDuration');
 					if(!this.playing){
 						this.togglePlaying();
 					}
-
-					this.songReady=false;
-
 				}
-				
 
 			},
 			loop(){
-				this.$refs.audio.currentTime=0;
-				this.$refs.audio.play();
+				this.player.currentTime=0;
+				this.player.loop=true;
 				if(this.currentLyric){
 					this.currentLyric.seek(0);
 				}
-			},
-			aduioEnd(){
-				this.next();			
-			},
-			canplay(){
-				this.songReady=true;
 			},
 			error(){
 				this.songReady=true;
@@ -371,14 +382,14 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				return `${this._pad(min)}:${this._pad(sec)}`
 			},
 			//设置时间更改
-			timeUpdate(e){
-				this.currentTime=e.target.currentTime;			
+			timeUpdate(){
+				this.currentTime=this.player.currentTime;		
 			},
 			//进度条
 			percentChange(percent){
 				let currentTime=percent*this.currentSong.duration;
 				this.currentTime=currentTime;
-				this.$refs.audio.currentTime=currentTime;
+				this.player.currentTime=currentTime;
 				if(this.currentLyric){
 					this.currentLyric.seek(currentTime*1000);
 				}
@@ -387,7 +398,13 @@ const  transitionDuration = prefixStyle('transitionDuration');
 			progressClick(percent){
 				let currentTime=percent*this.currentSong.duration;
 				this.currentTime=currentTime;
-				this.$refs.audio.currentTime=currentTime;
+				this.player.currentTime=currentTime;
+				if(!this.playing){
+					this.togglePlaying();
+				}
+				if(this.currentLyric){
+					this.currentLyric.seek(currentTime*1000);
+				}
 			},
 			getLyric(){
 				this.currentSong.getLyric().then((lyric)=>{
@@ -398,8 +415,10 @@ const  transitionDuration = prefixStyle('transitionDuration');
 					if(this.playing){
 						this.currentLyric.play()
 					}
-					// console.log(this.currentLyric);
-
+				}).catch(()=>{
+					this.currentLyric=null;
+					this.playingLyric='';
+					this.currentLineNum=0;
 				});
 			},
 			handleLyric({lineNum,txt}){
@@ -407,7 +426,7 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				this.playingLyric=txt;
 				if(lineNum>5){
 					let lineEl=this.$refs.lyricLine[lineNum-5];
-					this.$refs.lyricList.scrollToElement(lineEl,1000)
+					this.$refs.lyricList.scrollToElement(lineEl,1000);
 					
 				}else{
 					this.$refs.lyricList.scrollTo(0,0,1000);
@@ -536,26 +555,32 @@ const  transitionDuration = prefixStyle('transitionDuration');
 				if(newSong.id === oldSong.id){
 					return
 				}
+				this.isFavorite(); //更新是否收藏该歌曲
 				//每首歌切换的时候，歌词清零,不然歌词会来回跳
 				if(this.currentLyric){
 					this.currentLyric.stop();
 					this.playingLyric='';
 					this.currentLineNum=0;
-				}							
-				const audio=this.$refs.audio;
+				}
+				console.log('playlist');
+				console.log(this.playList);
+				// this.player.pause();							
 				// this.currentShow='cd';	
 				clearTimeout(this.timer);
 				this.timer=setTimeout(() =>{
+					this.savePlayHistory(this.currentSong); //播放历史
 					if(this.playing){
-						audio.play();
+						let songlist=this.playList.map((song)=>{
+							return song.mid;
+						})
+						this.player.play(songlist,{index:this.currentIndex});
 					}
 					this.getLyric();					
 				},1000);
 			},
 			playing(newVal,oldVal){		
-			    const audio=this.$refs.audio;	
 				this.$nextTick(()=>{
-					newVal ? audio.play() : audio.pause();
+					this.player.toggle();
 				})
 			},
 

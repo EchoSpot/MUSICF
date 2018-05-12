@@ -1,5 +1,5 @@
 <template>
-	<ul class="switches">
+	<ul class="switches" @click.stop>
 		<li class="switch-item" 
 		v-for='(item,index) in switches'
 		@click='itemClick(index)'

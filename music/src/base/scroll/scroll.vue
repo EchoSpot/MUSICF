@@ -34,6 +34,11 @@
 			beforeScroll:{
 				type:Boolean,
 				default:false
+			},
+			//延迟时间，用在有动画效果的时间上
+			refreshDelay:{
+				type:Number,
+				default:20
 			}
 		},
 		mounted() {
@@ -98,7 +103,7 @@
 			data(){
 				setTimeout(() => {
 					this.refresh()
-				},20)			
+				},this.refreshDelay)			
 			}
 		}
 

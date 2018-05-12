@@ -30,6 +30,7 @@ import {debounce} from 'common/js/util'
 		methods:{
 			clear(){
 				this.query='';
+				this.$emit('clear');
 			},
 			setQuery(query){
 				this.query=query;

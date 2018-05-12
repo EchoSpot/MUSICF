@@ -9,7 +9,7 @@
 					<div class="hotKey">
 						<h1 class="title">热门搜索</h1>
 						<ul>
-							<li v-for='item in hotKey' @click='valueSearch(item.k)' class="item">
+							<li v-for='item in hotKey' @click='valueSearch(item.k)' class="item" :key="item.k">
 								<span>{{item.k}}</span>
 							</li>
 						</ul>		

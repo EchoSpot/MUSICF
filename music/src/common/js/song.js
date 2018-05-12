@@ -2,7 +2,7 @@ import { getLyric } from 'api/lyrics'
 import {ERR_OK} from 'api/config'
 import {Base64} from 'js-base64'
 export default class Song{
-	constructor({id,mid,singer,name,album,duration,image,url}){
+	constructor({id,mid,singer,name,album,duration,image}){
 		this.id=id
 		this.mid=mid
 		this.singer=singer
@@ -10,7 +10,6 @@ export default class Song{
 		this.album=album
 		this.duration=duration
 		this.image=image
-		this.url=url
 	}
 
 	getLyric() {
@@ -39,7 +38,6 @@ export function createSong(musicData){
 		duration:musicData.interval,
 		album:musicData.albumname,
 		image:`https://y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
-		url:`http://ws.stream.qqmusic.qq.com/C100${musicData.songmid}.m4a?fromtag=0`
 	})
 
 }

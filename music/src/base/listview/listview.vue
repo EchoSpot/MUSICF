@@ -6,10 +6,10 @@
 			:listenScroll="listenScroll"
 			@scroll="scroll">
 		<div>
-			<div class="listview" v-for="item in data" ref="itemGroup">
+			<div class="listview" v-for="item in data" ref="itemGroup" :key="item.id">
 				<div class="title" v-text="item.title" ref="title"></div>
 				<ul class="singerList">
-					<li v-for="singer in item.list" class="singeritem" @click="selectItem(singer)">
+					<li v-for="singer in item.list" class="singeritem" @click="selectItem(singer)" :key="singer.mid">
 						<div class="avater">
 							<img v-lazy="singer.avater" alt="avater" width="50" height="50">
 						</div>
@@ -28,7 +28,8 @@
 			<li class="key-item" 
 				v-for="(item,index) in data"
 				:class="{active:index === currentIndex}"
-				:data-index='index'				
+				:data-index='index'	
+				:key="index"			
 			>
 				{{item.title.substr(0,1)}}
 			</li>

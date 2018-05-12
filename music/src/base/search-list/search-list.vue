@@ -1,5 +1,5 @@
 <template>
-	<div class="search-list">
+	<div class="search-list" @click.stop>
 		<transition-group name='list' tag='ul'>
 			<li class="search-item" 
 				:key='item' 

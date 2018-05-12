@@ -11,18 +11,19 @@
 						</span>
 					</h1>					
 				</div>
-				<scroll :data='playList' class="list-content" ref='scroll'>
+				<scroll :data='playList' class="list-content" ref='scroll' :refreshDelay='refreshDelay'>
 					<div>
 						<transition-group tag='ul' name='list'>
-							<li :key='item.id' 
+							<li  
 								v-for='(item,index) in playList' 
 								class="item" 
+								:key='index'
 								@click='selectItem(item,index)'
 								ref="playlistItem">
 								<i :class="{'icon-play':index===currentIndex}" class="play"></i>
 								<span class="text">{{item.name}}</span>
 								<span class="like" @click.stop='toggleFavorite(item)'>
-									<i class="icon-favorite"></i>
+									<i :class="getIconFavorite(item)"></i>
 								</span>
 								<span class="delete" @click.stop='deleteOne(item,index)'>
 									<i class="icon-delete"></i>
@@ -57,6 +58,7 @@ export default{
 	data(){
 		return{
 			showFlag:false,
+			refreshDelay: 320,
 		}
 
 	},
@@ -65,7 +67,8 @@ export default{
     		'mode',
     		'playList',
     		'currentIndex',
-    		'playing'
+    		'playing',
+			'favoriteList',
     	]),
     	iconMode(){
     		return this.mode === playMode.sequence ? 'icon-sequence' : this.mode ===playMode.loop ? 'icon-loop' :'icon-random'
@@ -80,7 +83,8 @@ export default{
     				return '循环播放'
     		}
 
-    	},
+		},
+
     },
 	methods:{
 		...mapMutations({
@@ -91,6 +95,8 @@ export default{
 		...mapActions([
 			'deleteSong',
 			'clearPlayList',
+			'saveMusicFavorite',
+			'removeMusicFavorite'
     	]),
 		show(){
 			this.showFlag=true;
@@ -120,6 +126,12 @@ export default{
 
 		},
 		toggleFavorite(item){
+			let flag=this.isFavorite(item);
+			if(flag){
+				this.removeMusicFavorite(item);
+			}else{
+				this.saveMusicFavorite(item);
+			}
 
 		},
 		deleteOne(item,index){
@@ -127,6 +139,18 @@ export default{
 			if(!this.playList.length){
 				this.hide();
 			}
+		},
+		getIconFavorite(song){
+			let flag=this.isFavorite(song);
+			return flag ? 'icon-favorite' :'icon-not-favorite';
+		},
+		isFavorite(song){
+			let list=this.favoriteList.slice();
+			let index=list.findIndex((item)=>{
+				return item.id === song.id;
+
+			});
+			return index>-1;
 		},
 		showConfirm(){
 			this.$refs.confirm.show();
@@ -231,9 +255,12 @@ export default{
 					color: $color-theme;
 					@include extend-click;
 					.icon-favorite{
-						// color: $color-sub-theme;						
-
+						color: $color-sub-theme;						
 					}
+					.icon-not-favorite{
+						color:$color-sub-theme;
+					}
+				
 				}
 				.delete{
 					@include extend-click;

@@ -14,16 +14,17 @@
 				</search-box>
 			</div>
 			<div class="shortcut" v-show='!query'>
-				<switches 
-				@itemClick='currentIndexChange'>					
-				</switches>
+				<switches @itemClick='currentIndexChange'></switches>
 				<!-- 最近播放 -->
 				<div class="recently"  v-show='!switchIndex'>
-					111
+					<scroll :data='playHistory' ref='playscroll' class='recentlyScroll'>
+						<song-list :list='playHistory' @select='ItemSelect'></song-list>
+					</scroll>					
 				</div>
-				<!-- 历史记录 -->
 				<div class="history" v-show='switchIndex'>
-					<search-list></search-list>
+					<scroll :data='searchHistory' ref='searchscroll'  class='historyScroll'>
+						<search-list @searchHistoryItemSelected='searchItemSelected'></search-list>
+					</scroll>
 				</div>
 			</div>
 			<div class="search-result" v-show='query'>
@@ -33,6 +34,12 @@
 					@scrollStart='suggestScrollStart'>						
 				</suggest>
 			</div>
+			<top-tip ref='toptip'>
+				<div class="tip-title"  >
+					<i class="icon-ok"></i>
+					<span class="text">一首歌曲已经添加到播放队列</span>
+				</div>
+			</top-tip>
 		</div>
 		
 	</transition>
@@ -40,9 +47,12 @@
 <script>
 import SearchBox from 'base/search-box/search-box'
 import Suggest from 'components/suggest/suggest'
-import {mapActions} from 'vuex'
+import {mapActions,mapGetters} from 'vuex'
 import Switches from 'base/switches/switches'
 import SearchList from 'base/search-list/search-list'
+import SongList from 'base/song-list/song-list'
+import Scroll from 'base/scroll/scroll'
+import topTip from 'base/top-tip/top-tip'
 export default{
 	data(){
 		return {
@@ -51,19 +61,34 @@ export default{
 			switchIndex:0,
 		}
 	},
+	computed:{
+		...mapGetters([
+			'playHistory',
+			'searchHistory',
+		])
+	},
 	methods:{
 		show(){
 			this.showFlag=true;
+			setTimeout(()=>{
+				if(this.currentIndex == 0){
+					this.$refs.playscroll.refresh();
+				}else{
+					this.$refs.searchscroll.refresh();
+				}
+				
+			}, 20);			
 		},
 		hide(){
 			this.showFlag=false;
 		},
 		queryChange(query){
 			this.query=query;
-
 		},
-		suggestItemSelect(){ //点击搜索词
+		//搜索词点击
+		suggestItemSelect(){ 
 			this.saveSearchHistory(this.query);
+			this.$refs.toptip.show();
 		},
 		suggestScrollStart(){  //滚动前，放下键盘
 			this.$refs.search.blur();
@@ -71,17 +96,48 @@ export default{
 		currentIndexChange(index){
 			this.switchIndex=index;
 		},
+		//播放历史点击
+		ItemSelect(item,index){
+			this.insertSong(item);
+			this.$refs.toptip.show();
+		},
+		//搜索历史点击
+		searchItemSelected(item){
+			this.$refs.search.setQuery(item);
+			this.$refs.toptip.show();
+		},
+		scrollRefresh(newValue){
+			let srcoll;
+			if(parseInt(newValue)){
+				scroll=this.$refs.searchscroll;			
+			}else{
+				scroll=this.$refs.playscroll;
+			}
+			setTimeout(()=>{
+				scroll.refresh();
+			},20);
+		},
 		...mapActions([
 			'saveSearchHistory',
-
+			'insertSong'
 		]),
+
 	},
 	components:{
 		SearchBox,
 		Suggest,
 		Switches,
 		SearchList,
-	}
+		Scroll,
+		SongList,
+		topTip,
+	},
+	watch:{
+		switchIndex(newValue){
+			this.scrollRefresh(newValue);
+		}
+
+	},
 }
 	
 </script>
@@ -130,13 +186,30 @@ export default{
 	.search-box-wrapper{
       margin: 20px
 	}
-	.shortcut{
+	.shortcut{		
 		margin:20px auto;
-		.history{
-			// width: 100%;
-			margin:0 20px;
-			text-align: left;
+		.recently,.history{
+			position: absolute;
+			top: 156px;
+			bottom:0;
+			width: 100%;
+			overflow:hidden;
 		}
+		.recently{			
+			.recentlyScroll{
+				height: 100%;
+				overflow:hidden;
+			}
+		}
+		.history{
+			text-align: left;
+			.historyScroll{
+				margin:0 20px;
+				height: 100%;
+				overflow: hidden;
+			}
+		}
+
 	}
 	.search-result{
 		position: absolute;

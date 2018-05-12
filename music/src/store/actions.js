@@ -1,5 +1,6 @@
 import * as types from './mutation-types'
-import {saveSearch,deleteOneSearch,deleteAllSearch} from 'common/js/cache'
+import {saveSearch,deleteOneSearch,deleteAllSearch,savePlay,saveFavorite,removeFavorite} from 'common/js/cache'
+
 export const selectPlay=function({commit,state},{list,index}){
 	commit(types.SET_SEQUENCE_LIST,list)
 	commit(types.SET_PLAYLIST,list)
@@ -7,7 +8,7 @@ export const selectPlay=function({commit,state},{list,index}){
 	commit(types.SET_FULL_SCREEN,true)
 	commit(types.SET_PLAYING_STATE,true)
 }
-//添加歌曲 在搜索页面使用
+//添加歌曲 在搜索页面,add-song使用
 export const insertSong=function({commit,state},song){
 	let playlist=[...state.playList]; //splice会改变原数组，所以备份数组
 	let currentIndex=state.currentIndex;
@@ -71,3 +72,18 @@ export const clearPlayList=function({commit}){
 	conmit(types.SET_CURRENT_INDEX,-1);
 	commit(types.SET_PLAYING_STATE,false);
 }
+//播放历史 在add-song组件使用
+export const  savePlayHistory = function({commit},song){
+	commit(types.SET_PLAY_HISTORY,savePlay(song));
+	
+}
+
+//我喜欢的歌曲
+export const saveMusicFavorite=function({commit},song){
+	commit(types.SET_FAVORITE_LIST,saveFavorite(song));
+}
+export const removeMusicFavorite=function({commit},song){
+	commit(types.SET_FAVORITE_LIST,removeFavorite(song));
+}
+
+

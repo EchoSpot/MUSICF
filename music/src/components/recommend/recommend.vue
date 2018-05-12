@@ -4,7 +4,7 @@
 			<div>
 				<div class="recommend-content" v-if="slider.length" >
 					<slider>
-						<div  v-for="item in slider">
+						<div  v-for="item in slider" :key="item.id">
 							<a :href="item.linkUrl">
 								<img :src="item.picUrl" class="needsclick">
 							</a>
@@ -16,6 +16,7 @@
 					<div class="remd_ul clearfix">
 						<a href="#" class="remd_li"  
 							v-for="item in discList.slice(0,3)"
+							:key="item.id"
 							@click='selectItem(item)'
 						>
 							<div class="remd_img">
@@ -26,8 +27,9 @@
 						</a>
 					</div>
 					<div class="remd_ul clearfix">
-						<a  href="#" class="remd_li"  
+						<a  href="#" class="remd_li"  							
 							v-for="item in discList.slice(3,6)"
+							:key="item.id"
 							@click='selectItem(item)'
 						>
 							<div class="remd_img">
@@ -38,7 +40,10 @@
 						</a>
 					</div>
 					<ul class="list">
-						<li class="item" v-for="item in discList.slice(6)" @click="selectItem(item)">
+						<li class="item"
+						v-for="item in discList.slice(6)" 
+						:key="item.id"
+						@click="selectItem(item)" >
 							<div class="icon">
 								<img v-lazy="item.imgurl" alt="tupia" width="60px" >
 							</div>
